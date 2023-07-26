@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "989162602572",
+    "project_id": "balancer-internal",
+    "storage_bucket": "balancer-internal.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:989162602572:android:a9b4761b578f26fda774e9",
+        "android_client_info": {
+          "package_name": "com.moreau.balancer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "989162602572-skleedsdfsptdqm6kaodfihen8gi7kr7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQHYRE2_rESOgb60cuf7KoZTPDywuuVc0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "989162602572-skleedsdfsptdqm6kaodfihen8gi7kr7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
