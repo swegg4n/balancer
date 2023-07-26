@@ -6,7 +6,8 @@ var appTheme = ThemeData(
   bottomAppBarTheme: const BottomAppBarTheme(
     color: Colors.black87,
   ),
-  primarySwatch: Colors.deepOrange,
+  primaryColor: Colors.lightBlue[700],
+  primarySwatch: Colors.blue,
   brightness: Brightness.dark,
   scaffoldBackgroundColor: Colors.grey[850],
 );

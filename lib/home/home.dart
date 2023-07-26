@@ -11,13 +11,13 @@ import 'package:Balancer/shared/error.dart';
 import 'package:Balancer/shared/loading.dart';
 import 'package:provider/provider.dart';
 
+import '../login/register.dart';
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    PageController pageController = PageController(initialPage: 1, keepPage: false);
-
     return ChangeNotifierProvider(
       create: (_) => HomeState(),
       child: StreamBuilder(
@@ -32,83 +32,75 @@ class HomeScreen extends StatelessWidget {
               message: snapshot.error.toString(),
             );
           } else if (snapshot.hasData) {
-            // if (!FirebaseAuth.instance.currentUser!.emailVerified) {
-            //   return WillPopScope(
-            //       onWillPop: () async {
-            //         return false;
-            //       },
-            //       child: RegisterVerifyScreen());
-            // } else {
-            final screens = [
-              const HistoryScreen(),
-              const AnalyticsScreen(),
-              const ProfileScreen(),
-            ];
+            if (!FirebaseAuth.instance.currentUser!.emailVerified) {
+              return WillPopScope(
+                  onWillPop: () async {
+                    return false;
+                  },
+                  child: RegisterVerifyScreen());
+            } else {
+              final screens = [
+                const HistoryScreen(),
+                const AnalyticsScreen(),
+                const ProfileScreen(),
+              ];
 
-            return WillPopScope(
-              onWillPop: () async {
-                return false;
-              },
-              child: Scaffold(
-                body: PageView(
-                  controller: pageController,
-                  onPageChanged: (idx) {
-                    homeState.selectedIndex = idx;
-                  },
-                  children: screens,
+              return WillPopScope(
+                onWillPop: () async {
+                  return false;
+                },
+                child: Scaffold(
+                  body: IndexedStack(
+                    index: homeState.selectedIndex,
+                    children: screens,
+                  ),
+                  bottomNavigationBar: BottomNavigationBar(
+                    iconSize: 30,
+                    showSelectedLabels: false,
+                    showUnselectedLabels: false,
+                    currentIndex: homeState.selectedIndex,
+                    onTap: (int idx) {
+                      homeState.selectedIndex = idx;
+                    },
+                    items: [
+                      BottomNavigationBarItem(
+                        activeIcon: Icon(
+                          FontAwesomeIcons.book,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                        icon: const Icon(
+                          FontAwesomeIcons.book,
+                          color: Color(0xffcccccc),
+                        ),
+                        label: 'History',
+                      ),
+                      BottomNavigationBarItem(
+                        activeIcon: Icon(
+                          FontAwesomeIcons.chartColumn,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                        icon: const Icon(
+                          FontAwesomeIcons.chartColumn,
+                          color: Color(0xffcccccc),
+                        ),
+                        label: 'Analytics',
+                      ),
+                      BottomNavigationBarItem(
+                        activeIcon: Icon(
+                          FontAwesomeIcons.houseUser,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                        icon: const Icon(
+                          FontAwesomeIcons.houseUser,
+                          color: Color(0xffcccccc),
+                        ),
+                        label: 'Profile',
+                      ),
+                    ],
+                  ),
                 ),
-                bottomNavigationBar: BottomNavigationBar(
-                  iconSize: 30,
-                  showSelectedLabels: false,
-                  showUnselectedLabels: false,
-                  currentIndex: homeState.selectedIndex,
-                  onTap: (int idx) {
-                    homeState.selectedIndex = idx;
-                    pageController.animateToPage(idx, duration: const Duration(milliseconds: 10), curve: Curves.linear);
-                  },
-                  items: [
-                    BottomNavigationBarItem(
-                      activeIcon: Image.asset(
-                        'assets/rb_icon_solid.png',
-                        color: Colors.deepOrange,
-                        height: 32,
-                      ),
-                      icon: Image.asset(
-                        'assets/rb_icon_solid.png',
-                        color: const Color(0xffcccccc),
-                        height: 32,
-                      ),
-                      label: 'My RB',
-                    ),
-                    BottomNavigationBarItem(
-                      activeIcon: Image.asset(
-                        'assets/ball_icon_solid.png',
-                        color: Colors.deepOrange,
-                        height: 32,
-                      ),
-                      icon: Image.asset(
-                        'assets/ball_icon_solid.png',
-                        color: const Color(0xffcccccc),
-                        height: 32,
-                      ),
-                      label: 'Play',
-                    ),
-                    const BottomNavigationBarItem(
-                      activeIcon: Icon(
-                        FontAwesomeIcons.solidUser,
-                        color: Colors.deepOrange,
-                      ),
-                      icon: Icon(
-                        FontAwesomeIcons.solidUser,
-                        color: Color(0xffcccccc),
-                      ),
-                      label: 'Profile',
-                    ),
-                  ],
-                ),
-              ),
-            );
-            // }
+              );
+            }
           } else {
             return const LoginScreen();
           }

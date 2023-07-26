@@ -4,13 +4,53 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:Balancer/login/sign_in.dart';
 import 'package:Balancer/services/auth.dart';
 import 'package:Balancer/shared/button.dart';
+import 'package:Balancer/login/register.dart';
 
 class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    // MediaQuery.of(context).size.height;
+    return WillPopScope(
+      onWillPop: () async {
+        return false;
+      },
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Container(
+          margin: const EdgeInsets.only(
+            left: 40,
+            right: 40,
+            top: 50,
+          ),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            const Spacer(flex: 4),
+            Image.asset('assets/logo_t.png', width: 150, height: 150, color: Colors.white),
+            const Spacer(flex: 5),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Button(
+                    text: 'Sign in',
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => const SignInScreen()));
+                    }),
+                const Padding(padding: EdgeInsets.only(bottom: 15)),
+                Button(
+                    text: 'Register',
+                    color: Colors.grey[850],
+                    borderColor: Colors.grey[700],
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => const RegisterScreen()));
+                    }),
+              ],
+            ),
+            const Spacer(flex: 5),
+          ]),
+        ),
+      ),
+    );
   }
 }
 
