@@ -50,10 +50,30 @@ class Button extends StatelessWidget {
         padding: EdgeInsets.symmetric(vertical: paddingVertical, horizontal: paddingHorizontal),
         child: Text(
           text,
-          style: TextStyle(fontSize: fontSize, color: textColor ?? Colors.white),
+          style: TextStyle(fontSize: fontSize, color: disabled ? const Color(0xffcccccc) : textColor ?? Colors.white),
           textAlign: TextAlign.center,
         ),
       ),
+    );
+  }
+}
+
+class ButtonText extends StatelessWidget {
+  final String text;
+  final Function? onPressed;
+  final double fontSize;
+  final bool disabled;
+
+  const ButtonText({Key? key, required this.text, required this.onPressed, this.fontSize = 20, this.disabled = false}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      style: TextButton.styleFrom(
+        textStyle: TextStyle(fontSize: fontSize),
+      ),
+      onPressed: (disabled || onPressed == null) ? null : () async => onPressed!(),
+      child: Text(text),
     );
   }
 }

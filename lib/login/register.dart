@@ -29,6 +29,7 @@ class RegisterScreen extends StatelessWidget {
             icon: const Icon(FontAwesomeIcons.xmark),
             onPressed: () => Navigator.pop(context),
           ),
+          backgroundColor: Colors.grey[850],
         ),
         resizeToAvoidBottomInset: false,
         body: Container(
@@ -41,7 +42,7 @@ class RegisterScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextFieldPrimary(
-                  label: 'Full name',
+                  label: 'Name',
                   icon: FontAwesomeIcons.solidUser,
                   controller: nameController,
                   inputType: TextInputType.name,

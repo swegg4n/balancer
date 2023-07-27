@@ -7,7 +7,7 @@ class HistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: NewExpenseButton(),
+      floatingActionButton: NewExpenseButton(heroTag: "floating_history"),
       body: Container(
         margin: EdgeInsets.only(top: 60, left: 25, right: 25, bottom: 60),
         child: Placeholder(),
