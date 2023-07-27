@@ -51,7 +51,7 @@ class FirestoreService {
     }
   }
 
-  Future<void> updateUserInfo(String? name, String? nickname, XFile? pfp) async {
+  Future<void> updateUserInfo(String? name, XFile? pfp) async {
     User user = AuthService().user!;
 
     String? pfpUrl;
@@ -89,11 +89,10 @@ class FirestoreService {
       var ref = _db.collection('users').doc(user.uid);
       var data = {
         'name': '[deleted user]',
-        'nickname': '',
         'email': '',
         'uid': '',
         'pfpUrl': '',
-        'matches': [],
+        'households': [],
       };
       await ref.update(data);
     } catch (_) {}

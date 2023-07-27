@@ -26,19 +26,23 @@ class LoginScreen extends StatelessWidget {
           ),
           child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
             const Spacer(flex: 4),
-            Image.asset('assets/logo_t.png', width: 150, height: 150, color: Colors.white),
+            Image.asset('assets/logo_t.png', width: 170, height: 170, color: Colors.white),
             const Spacer(flex: 5),
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Button(
-                    text: 'Sign in',
-                    onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => const SignInScreen()));
-                    }),
+                  text: 'Sign in',
+                  fontSize: 22,
+                  color: Theme.of(context).primaryColor,
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => const SignInScreen()));
+                  },
+                ),
                 const Padding(padding: EdgeInsets.only(bottom: 15)),
                 Button(
                     text: 'Register',
+                    fontSize: 22,
                     color: Colors.grey[850],
                     borderColor: Colors.grey[700],
                     onPressed: () {

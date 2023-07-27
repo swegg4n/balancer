@@ -15,15 +15,10 @@ class AppPreferences {
     String version;
     String buildNumber;
 
-    if (Platform.isAndroid) {
-      List<String> split = packageInfo.version.split('.');
-      version = "${split[0]}.${split[1]}";
-      buildNumber = packageInfo.buildNumber;
-    } else {
-      List<String> split = packageInfo.buildNumber.split('.');
-      version = "${split[0]}.${split[1]}";
-      buildNumber = packageInfo.version;
-    }
+    List<String> split = packageInfo.version.split('.');
+    version = "${split[0]}.${split[1]}";
+    buildNumber = packageInfo.buildNumber;
+
     appVersion = "version $version ($buildNumber)";
   }
 }

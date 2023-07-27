@@ -26,6 +26,7 @@ class SignInScreen extends StatelessWidget {
             icon: const Icon(FontAwesomeIcons.xmark),
             onPressed: () => Navigator.pop(context),
           ),
+          backgroundColor: Colors.grey[850],
         ),
         resizeToAvoidBottomInset: false,
         body: Container(

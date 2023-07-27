@@ -40,7 +40,7 @@ class TextFieldPrimary extends StatelessWidget {
         controller: controller,
         decoration: InputDecoration(
           border: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[700]!)),
-          filled: true,
+          filled: false,
           hintText: label,
           prefixIcon: Icon(icon, size: 18),
           enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[700]!)),
