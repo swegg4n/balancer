@@ -1,51 +1,67 @@
 import 'package:flutter/material.dart';
 
 class TextFieldPrimary extends StatelessWidget {
-  final String label;
-  final IconData icon;
   final TextEditingController controller;
+  final String? label;
+  final IconData? icon;
   final TextInputType inputType;
   final TextInputAction textInputAction;
   final bool obscure;
   final bool autofocus;
   final int? maxLength;
   final bool enabled;
+  final bool outline;
+  final double fontSize;
+  final Function? onChanged;
+  final TextCapitalization textCapitalization;
 
   const TextFieldPrimary({
     Key? key,
-    required this.label,
-    required this.icon,
     required this.controller,
+    this.label,
+    this.icon,
     this.inputType = TextInputType.text,
     this.textInputAction = TextInputAction.done,
     this.obscure = false,
     this.autofocus = true,
     this.maxLength,
     this.enabled = true,
+    this.outline = true,
+    this.fontSize = 17,
+    this.onChanged,
+    this.textCapitalization = TextCapitalization.none,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 60,
+      height: outline ? 60 : 50,
       child: TextField(
         enabled: enabled,
         maxLength: maxLength,
         autofocus: autofocus,
         textInputAction: textInputAction,
         keyboardType: inputType,
+        textCapitalization: textCapitalization,
         textAlignVertical: TextAlignVertical.bottom,
-        style: const TextStyle(fontSize: 17),
+        style: TextStyle(fontSize: fontSize),
         obscureText: obscure,
         controller: controller,
         decoration: InputDecoration(
-          border: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[700]!)),
+          border: outline
+              ? OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[700]!))
+              : UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey[700]!)),
           filled: false,
           hintText: label,
-          prefixIcon: Icon(icon, size: 18),
-          enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[700]!)),
-          focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor)),
+          prefixIcon: icon != null ? Icon(icon, size: 18) : null,
+          enabledBorder: outline
+              ? OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[700]!))
+              : UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey[700]!)),
+          focusedBorder: outline
+              ? OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor))
+              : UnderlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor)),
         ),
+        onChanged: (value) => (onChanged == null) ? null : onChanged!(),
       ),
     );
   }

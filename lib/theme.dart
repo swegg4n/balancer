@@ -10,4 +10,13 @@ var appTheme = ThemeData(
   primarySwatch: Colors.blue,
   brightness: Brightness.dark,
   scaffoldBackgroundColor: Colors.grey[850],
+  sliderTheme: ThemeData.dark().sliderTheme.copyWith(
+        valueIndicatorColor: Colors.lightBlue[700],
+        valueIndicatorTextStyle: const TextStyle(
+          backgroundColor: Colors.transparent,
+        ),
+        activeTickMarkColor: Colors.transparent,
+        inactiveTickMarkColor: Colors.transparent,
+        showValueIndicator: ShowValueIndicator.always,
+      ),
 );

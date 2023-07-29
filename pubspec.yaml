@@ -29,6 +29,7 @@ dependencies:
   permission_handler: ^10.0.0
   google_fonts: ^4.0.4
   multi_value_listenable_builder: ^0.0.2
+  syncfusion_flutter_datepicker: ^22.2.5
 
 dev_dependencies:
   flutter_test:

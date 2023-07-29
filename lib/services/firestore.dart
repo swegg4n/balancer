@@ -14,6 +14,90 @@ import 'package:Balancer/services/models.dart';
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
+  // Stream<Match> streamMatch() {
+  //   return AuthService().userStream.switchMap((user) {
+  //     if (user != null) {
+  //       var ref = _db.collection('matches').doc(user.uid);
+  //       return ref.snapshots().map((doc) => Match.fromJson(doc.data()!));
+  //     } else {
+  //       return Stream.fromIterable([Match()]);
+  //     }
+  //   });
+  // }
+  // Stream<Match> streamHosehold() {
+  //   return AuthService().userStream.switchMap((user) {
+  //     if (user != null) {
+  //       var ref = _db.collection('households').doc(user.uid);
+  //       return ref.snapshots().map((doc) => Match.fromJson(doc.data()!));
+  //     } else {
+  //       return Stream.fromIterable([Match()]);
+  //     }
+  //   });
+  // }
+
+  Future<bool> createExpense(Expense expense) async {
+    User user = AuthService().user!;
+    expense.userId = user.uid;
+
+    var doc = await _db.collection('users').doc(user.uid).get();
+    String householdId = doc.get('household');
+
+    doc = await _db.collection('households').doc(householdId).get();
+    String userId1 = doc.get('userId1');
+    String userId2 = doc.get('userId2');
+
+    bool isUser1 = false;
+    bool isUser2 = false;
+
+    if (userId1 == user.uid) {
+      isUser1 = true;
+    } else if (userId2 == user.uid) {
+      isUser2 = true;
+    } else {
+      debugPrint('[ERROR] User is not part of this household');
+      return false;
+    }
+
+    if (isUser2) {
+      expense.split = 1 - expense.split;
+    }
+
+    var expense_data = {
+      'description': expense.description,
+      'amount': expense.amount,
+      'categoryIndex': expense.categoryIndex,
+      'split': expense.split,
+      'date': expense.date,
+      'userId': expense.userId,
+    };
+
+    var ref = _db.collection('expenses').doc();
+    String expense_id = ref.id;
+
+    try {
+      if (isUser1 || isUser2) {
+        await ref.set(expense_data, SetOptions(merge: true));
+
+        ref = _db.collection('households').doc(householdId);
+        if (isUser1) {
+          var data = {
+            'expensesIdsUser1': FieldValue.arrayUnion([expense_id])
+          };
+          ref.update(data);
+        } else {
+          var data = {
+            'expensesIdsUser2': FieldValue.arrayUnion([expense_id])
+          };
+          ref.update(data);
+        }
+      }
+    } catch (e) {
+      return false;
+    }
+
+    return true;
+  }
+
   Stream<MyUser> streamUser() {
     return AuthService().userStream.switchMap((user) {
       if (user != null) {
@@ -44,7 +128,7 @@ class FirestoreService {
         'email': user.email,
         'uid': user.uid,
         'pfpUrl': pfpUrl,
-        'households': FieldValue.arrayUnion([]),
+        'household': '',
       };
 
       return await ref.set(data, SetOptions(merge: true));
@@ -92,7 +176,7 @@ class FirestoreService {
         'email': '',
         'uid': '',
         'pfpUrl': '',
-        'households': [],
+        'household': '',
       };
       await ref.update(data);
     } catch (_) {}

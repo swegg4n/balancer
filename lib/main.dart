@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:Balancer/expenses/expenses_state.dart';
 import 'package:Balancer/profile/profile_state.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:device_preview/device_preview.dart';
@@ -125,6 +126,7 @@ class _AppState extends State<App> {
             return MultiProvider(
               providers: [
                 ChangeNotifierProvider(create: (_) => ProfileState()),
+                ChangeNotifierProvider(create: (_) => ExpensesState()),
                 StreamProvider(
                   create: (_) => FirestoreService().streamUser(),
                   initialData: MyUser(),
