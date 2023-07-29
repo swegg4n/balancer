@@ -1,8 +1,5 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:Balancer/login/sign_in.dart';
-import 'package:Balancer/services/auth.dart';
 import 'package:Balancer/shared/button.dart';
 import 'package:Balancer/login/register.dart';
 

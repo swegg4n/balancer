@@ -1,6 +1,5 @@
 import 'package:Balancer/expenses/categories.dart';
 import 'package:Balancer/expenses/expenses_state.dart';
-import 'package:Balancer/main.dart';
 import 'package:Balancer/services/bottom_modal.dart';
 import 'package:Balancer/services/firestore.dart';
 import 'package:Balancer/services/models.dart';
