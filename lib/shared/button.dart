@@ -57,7 +57,7 @@ class Button extends StatelessWidget {
   }
 }
 
-class ButtonIcon extends StatelessWidget {
+class ButtonIconR extends StatelessWidget {
   final String text;
   final String subtext;
   final Function? onPressed;
@@ -73,9 +73,93 @@ class ButtonIcon extends StatelessWidget {
   final double? iconSize;
   final Color? iconColor;
 
-  const ButtonIcon(
+  const ButtonIconR(
       {Key? key,
-      required this.text,
+      this.text = '',
+      this.subtext = '',
+      required this.onPressed,
+      this.fontSize = 20,
+      this.paddingHorizontal = 12,
+      this.paddingVertical = 15,
+      this.color,
+      this.textColor,
+      this.borderColor,
+      this.borderSize,
+      this.disabled = false,
+      required this.icon,
+      this.iconSize = 20,
+      this.iconColor = Colors.white})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.all((onPressed != null && disabled == false)
+              ? (color ?? Colors.grey[700])
+              : (color != null ? color!.withOpacity(0.5) : Colors.grey[700]!.withOpacity(0.5))),
+          side: MaterialStateProperty.all(
+            BorderSide(
+              style: borderColor != null ? BorderStyle.solid : BorderStyle.none,
+              width: borderSize ?? 3.0,
+              color: borderColor ?? (color ?? Colors.grey[700]!),
+            ),
+          )),
+      onPressed: disabled
+          ? null
+          : onPressed != null
+              ? () => onPressed!()
+              : null,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: paddingVertical, horizontal: paddingHorizontal),
+        child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Visibility(
+                visible: text != '',
+                child: Text(
+                  text,
+                  style: TextStyle(fontSize: fontSize, color: disabled ? const Color(0xffcccccc) : textColor ?? Colors.white),
+                  textAlign: TextAlign.right,
+                ),
+              ),
+              Visibility(
+                visible: subtext != '',
+                child: Text(
+                  subtext,
+                  style: TextStyle(fontSize: fontSize - 5, color: const Color(0xffcccccc)),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+          Icon(icon, size: iconSize, color: iconColor),
+        ]),
+      ),
+    );
+  }
+}
+
+class ButtonIconL extends StatelessWidget {
+  final String text;
+  final String subtext;
+  final Function? onPressed;
+  final double fontSize;
+  final double paddingHorizontal;
+  final double paddingVertical;
+  final Color? color;
+  final Color? textColor;
+  final Color? borderColor;
+  final double? borderSize;
+  final bool disabled;
+  final IconData? icon;
+  final double? iconSize;
+  final Color? iconColor;
+
+  const ButtonIconL(
+      {Key? key,
+      this.text = '',
       this.subtext = '',
       required this.onPressed,
       this.fontSize = 20,
@@ -117,10 +201,13 @@ class ButtonIcon extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                text,
-                style: TextStyle(fontSize: fontSize, color: disabled ? const Color(0xffcccccc) : textColor ?? Colors.white),
-                textAlign: TextAlign.right,
+              Visibility(
+                visible: text != '',
+                child: Text(
+                  text,
+                  style: TextStyle(fontSize: fontSize, color: disabled ? const Color(0xffcccccc) : textColor ?? Colors.white),
+                  textAlign: TextAlign.right,
+                ),
               ),
               Visibility(
                 visible: subtext != '',
@@ -149,7 +236,7 @@ class CategoryButton extends StatelessWidget {
     Key? key,
     required this.icon,
     required this.onPressed,
-    this.iconSize = 36,
+    this.iconSize = 38,
     this.iconColor = Colors.white,
     this.backgroundColor,
   }) : super(key: key);
@@ -163,12 +250,12 @@ class CategoryButton extends StatelessWidget {
           color: backgroundColor ?? Colors.grey[800],
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Center(
-          child: InkWell(
-            borderRadius: BorderRadius.circular(10),
-            onTap: () => onPressed == null ? null : onPressed!(),
-            child: Padding(
-              padding: const EdgeInsets.all(10),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(10),
+          onTap: () => onPressed == null ? null : onPressed!(),
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Center(
               child: Icon(
                 icon,
                 size: iconSize,

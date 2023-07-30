@@ -1,10 +1,14 @@
+import 'package:Balancer/services/firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+
+import 'auth.dart';
 
 class AppPreferences {
   static late SharedPreferences _prefs;
   static late PackageInfo packageInfo;
   static late String appVersion;
+  static late String householdId;
 
   static Future init() async {
     packageInfo = await PackageInfo.fromPlatform();
@@ -18,5 +22,7 @@ class AppPreferences {
     buildNumber = packageInfo.buildNumber;
 
     appVersion = "version $version ($buildNumber)";
+
+    householdId = await FirestoreService().getHouseholdId();
   }
 }

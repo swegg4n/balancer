@@ -1,5 +1,6 @@
 import 'package:Balancer/analytics/analytics.dart';
 import 'package:Balancer/history/history.dart';
+import 'package:Balancer/shared/foreground.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -8,7 +9,6 @@ import 'package:Balancer/login/login.dart';
 import 'package:Balancer/profile/profile.dart';
 import 'package:Balancer/services/auth.dart';
 import 'package:Balancer/shared/error.dart';
-import 'package:Balancer/shared/loading.dart';
 import 'package:provider/provider.dart';
 
 import '../login/register.dart';
@@ -26,7 +26,7 @@ class HomeScreen extends StatelessWidget {
           var homeState = Provider.of<HomeState>(context);
 
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const LoadingScreen();
+            return const ForegroundScreen();
           } else if (snapshot.hasError) {
             return ErrorMessage(
               message: snapshot.error.toString(),

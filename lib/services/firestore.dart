@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
+import 'package:Balancer/services/app_preferences.dart';
 import 'package:crypto/crypto.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -14,87 +15,58 @@ import 'package:Balancer/services/models.dart';
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  // Stream<Match> streamMatch() {
+  Future<String> getHouseholdId() async {
+    User user = AuthService().user!;
+    var doc = await _db.collection('users').doc(user.uid).get();
+    return doc.get('household');
+  }
+
+  // Stream<Household> streamHousehold() {
   //   return AuthService().userStream.switchMap((user) {
-  //     if (user != null) {
-  //       var ref = _db.collection('matches').doc(user.uid);
-  //       return ref.snapshots().map((doc) => Match.fromJson(doc.data()!));
+  //     if (user != null && AppPreferences.householdId != '') {
+  //       var ref = _db.collection('households').doc(AppPreferences.householdId);
+  //       return ref.snapshots().map((doc) => Household.fromJson(doc.data()!));
   //     } else {
-  //       return Stream.fromIterable([Match()]);
-  //     }
-  //   });
-  // }
-  // Stream<Match> streamHosehold() {
-  //   return AuthService().userStream.switchMap((user) {
-  //     if (user != null) {
-  //       var ref = _db.collection('households').doc(user.uid);
-  //       return ref.snapshots().map((doc) => Match.fromJson(doc.data()!));
-  //     } else {
-  //       return Stream.fromIterable([Match()]);
+  //       return Stream.fromIterable([Household()]);
   //     }
   //   });
   // }
 
   Future<bool> createExpense(Expense expense) async {
     User user = AuthService().user!;
-    expense.userId = user.uid;
-
-    var doc = await _db.collection('users').doc(user.uid).get();
-    String householdId = doc.get('household');
-
-    doc = await _db.collection('households').doc(householdId).get();
-    String userId1 = doc.get('userId1');
-    String userId2 = doc.get('userId2');
-
-    bool isUser1 = false;
-    bool isUser2 = false;
-
-    if (userId1 == user.uid) {
-      isUser1 = true;
-    } else if (userId2 == user.uid) {
-      isUser2 = true;
-    } else {
-      debugPrint('[ERROR] User is not part of this household');
-      return false;
-    }
-
-    if (isUser2) {
-      expense.split = 1 - expense.split;
-    }
-
     var expense_data = {
       'description': expense.description,
       'amount': expense.amount,
       'categoryIndex': expense.categoryIndex,
       'split': expense.split,
-      'date': expense.date,
-      'userId': expense.userId,
+      'epoch': expense.epoch,
+      'userId': user.uid,
+      'householdId': AppPreferences.householdId,
     };
 
     var ref = _db.collection('expenses').doc();
-    String expense_id = ref.id;
+    ref.set(expense_data);
 
-    try {
-      if (isUser1 || isUser2) {
-        await ref.set(expense_data, SetOptions(merge: true));
+    return true;
+  }
 
-        ref = _db.collection('households').doc(householdId);
-        if (isUser1) {
-          var data = {
-            'expensesIdsUser1': FieldValue.arrayUnion([expense_id])
-          };
-          ref.update(data);
-        } else {
-          var data = {
-            'expensesIdsUser2': FieldValue.arrayUnion([expense_id])
-          };
-          ref.update(data);
-        }
-      }
-    } catch (e) {
-      return false;
-    }
+  Future<bool> updateExpense(Expense expense, String documentId) async {
+    var expense_data = {
+      'description': expense.description,
+      'amount': expense.amount,
+      'categoryIndex': expense.categoryIndex,
+      'split': expense.split,
+      'epoch': expense.epoch,
+    };
 
+    var ref = _db.collection('expenses').doc(documentId);
+    ref.update(expense_data);
+    return true;
+  }
+
+  Future<bool> deleteExpense(String documentId) async {
+    var ref = _db.collection('expenses').doc(documentId);
+    await ref.delete();
     return true;
   }
 

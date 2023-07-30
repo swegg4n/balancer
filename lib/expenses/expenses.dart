@@ -30,7 +30,7 @@ class NewExpenseButton extends StatelessWidget {
             )),
         icon: const Icon(FontAwesomeIcons.plus, size: 20),
         onPressed: () {
-          Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => const NewExpenseScreen()));
+          Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => const UpdateExpenseScreen(null, null)));
         },
         backgroundColor: Theme.of(context).primaryColor,
       ),
@@ -38,14 +38,17 @@ class NewExpenseButton extends StatelessWidget {
   }
 }
 
-class NewExpenseScreen extends StatefulWidget {
-  const NewExpenseScreen({super.key});
+class UpdateExpenseScreen extends StatefulWidget {
+  final Expense? existingExpense;
+  final String? documentId;
+
+  const UpdateExpenseScreen(this.existingExpense, this.documentId, {super.key});
 
   @override
-  State<NewExpenseScreen> createState() => _NewExpenseScreenState();
+  State<UpdateExpenseScreen> createState() => _UpdateExpenseScreenState();
 }
 
-class _NewExpenseScreenState extends State<NewExpenseScreen> {
+class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController amountController = TextEditingController();
 
@@ -59,12 +62,36 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
     });
   }
 
+  bool loading2 = false;
+  void setLoading2(bool value) {
+    setState(() {
+      loading2 = value;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      var expensesState = Provider.of<ExpensesState>(context, listen: false);
+
+      if (widget.existingExpense != null) {
+        expensesState.selectedDate = DateTime.fromMillisecondsSinceEpoch(widget.existingExpense!.epoch);
+        expensesState.selectedCategory = categories[widget.existingExpense!.categoryIndex];
+        descriptionController.text = widget.existingExpense!.description;
+        amountController.text = widget.existingExpense!.amount.round().toString();
+        splitPct = (widget.existingExpense!.split * 100).roundToDouble();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var expensesState = Provider.of<ExpensesState>(context);
+    String date = expensesState.selectedDate.toString().split(' ')[0];
 
-    String date =
-        '${expensesState.selectedDate.year}-${expensesState.selectedDate.month.toString().padLeft(2, '0')}-${expensesState.selectedDate.day.toString().padLeft(2, '0')}';
+    bool editExpense = widget.existingExpense != null;
 
     return WillPopScope(
       onWillPop: () async {
@@ -76,7 +103,8 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
         child: Scaffold(
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
-            title: const FittedBox(fit: BoxFit.fitWidth, child: Text('add a new expense', style: TextStyle(fontSize: 20))),
+            title: FittedBox(
+                fit: BoxFit.fitWidth, child: Text(editExpense ? 'edit expense' : 'add a new expense', style: const TextStyle(fontSize: 20))),
             leading: IconButton(
               icon: const Icon(FontAwesomeIcons.xmark),
               onPressed: () {
@@ -93,7 +121,7 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TextFieldPrimary(
-                  label: 'Enter a description',
+                  label: editExpense ? '' : 'Enter a description',
                   fontSize: 20,
                   icon: null,
                   outline: false,
@@ -113,7 +141,7 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
                   children: [
                     Expanded(
                       child: TextFieldPrimary(
-                        label: '0',
+                        label: editExpense ? '' : '0',
                         fontSize: 20,
                         icon: null,
                         outline: false,
@@ -129,10 +157,11 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
                       ),
                     ),
                     const Padding(padding: EdgeInsets.only(right: 15)),
-                    const Text('SEK', style: TextStyle(fontSize: 20, color: Color(0xffcccccc))),
+                    const Text('kr', style: TextStyle(fontSize: 20, color: Color(0xffcccccc))),
                     const Spacer(),
                     CategoryButton(
                       icon: expensesState.selectedCategory.icon!,
+                      iconColor: expensesState.selectedCategory.color,
                       onPressed: () {
                         showDialog(context: context, builder: (context) => CategoriesPicker(expensesState: expensesState));
                       },
@@ -164,12 +193,20 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
                 const Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('0% for me', style: TextStyle(fontSize: 16, color: Color(0xffcccccc))),
-                    Text('100% for me', style: TextStyle(fontSize: 16, color: Color(0xffcccccc))),
+                    Text(
+                      '0% my\nexpense',
+                      style: TextStyle(fontSize: 15, color: Color(0xffcccccc)),
+                      textAlign: TextAlign.center,
+                    ),
+                    Text(
+                      '100% my\nexpense',
+                      style: TextStyle(fontSize: 15, color: Color(0xffcccccc)),
+                      textAlign: TextAlign.center,
+                    ),
                   ],
                 ),
                 const Spacer(),
-                ButtonIcon(
+                ButtonIconR(
                   text: date,
                   icon: FontAwesomeIcons.calendar,
                   iconSize: 24,
@@ -177,7 +214,7 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
                   paddingHorizontal: 5,
                   color: Colors.grey[850],
                   onPressed: () {
-                    showDialog(context: context, builder: (context) => DateTimePicker(expensesState: expensesState));
+                    showDialog(context: context, builder: (context) => DateTimePickerExpenses(expensesState: expensesState));
                   },
                 ),
                 const Spacer(flex: 3),
@@ -197,7 +234,7 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
                     maintainAnimation: true,
                     maintainState: true,
                     child: Button(
-                      text: 'Add',
+                      text: editExpense ? 'Update' : 'Add',
                       fontSize: 24,
                       paddingVertical: 20,
                       paddingHorizontal: 50,
@@ -205,32 +242,103 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
                       onPressed: () async {
                         setLoading(true);
 
-                        bool success = await FirestoreService().createExpense(
-                          Expense(
-                            description: descriptionController.text,
-                            amount: double.parse(amountController.text),
-                            categoryIndex: expensesState.selectedCategory.index,
-                            date: expensesState.selectedDate.toString(),
-                            split: splitPct / 100,
-                          ),
+                        bool success = false;
+                        Expense newExpense = Expense(
+                          description: descriptionController.text,
+                          amount: double.parse(amountController.text),
+                          categoryIndex: expensesState.selectedCategory.index,
+                          epoch: expensesState.selectedDate.millisecondsSinceEpoch,
+                          split: splitPct / 100,
                         );
 
-                        if (success) {
-                          expensesState.reset();
-                          descriptionController.text = '';
-                          amountController.text = '';
-                          splitPct = 50;
-                          allInfoProvided = false;
-                          BottomModal.showSuccessModal(context, 'Success!', 'The expense was added');
+                        if (editExpense) {
+                          success = await FirestoreService().updateExpense(newExpense, widget.documentId!);
                         } else {
-                          BottomModal.showErrorModal(context, 'Failed to add expense', 'Please try again');
+                          success = await FirestoreService().createExpense(newExpense);
                         }
+
+                        if (success) {
+                          BottomModal.showSuccessModal(context, 'Success!', editExpense ? 'The expense was updated' : 'The expense was added');
+                        } else {
+                          BottomModal.showErrorModal(context, 'Failed to ${editExpense ? 'edit' : 'add'} expense', 'Please try again');
+                        }
+
+                        if (editExpense) {
+                          await Future.delayed(Duration(seconds: 2));
+                          Navigator.pop(context);
+                          Navigator.pop(context);
+                        }
+
+                        expensesState.reset();
+                        descriptionController.text = '';
+                        amountController.text = '';
+                        splitPct = 50;
+                        allInfoProvided = false;
+
                         setLoading(false);
                       },
-                      disabled: !allInfoProvided,
+                      disabled: !allInfoProvided && !editExpense,
                     ),
                   ),
                 ]),
+                Visibility(
+                  visible: editExpense,
+                  child: Stack(alignment: Alignment.center, children: [
+                    Visibility(
+                      visible: loading2,
+                      maintainSize: true,
+                      maintainAnimation: true,
+                      maintainState: true,
+                      child: Loader(
+                        size: 32,
+                        color: Colors.red[400],
+                      ),
+                    ),
+                    Visibility(
+                      visible: !loading2,
+                      maintainSize: true,
+                      maintainAnimation: true,
+                      maintainState: true,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 15),
+                        child: Button(
+                          text: 'Delete',
+                          fontSize: 20,
+                          paddingVertical: 10,
+                          paddingHorizontal: 60,
+                          color: Colors.red[400],
+                          onPressed: () async {
+                            setLoading2(true);
+
+                            bool success = false;
+                            success = await FirestoreService().deleteExpense(widget.documentId!);
+
+                            if (success) {
+                              BottomModal.showSuccessModal(context, 'Success!', 'The expense was deleted');
+                            } else {
+                              BottomModal.showErrorModal(context, 'Failed to delete expense', 'Please try again');
+                            }
+
+                            if (editExpense) {
+                              await Future.delayed(Duration(seconds: 2));
+                              Navigator.pop(context);
+                              Navigator.pop(context);
+                            }
+
+                            expensesState.reset();
+                            descriptionController.text = '';
+                            amountController.text = '';
+                            splitPct = 50;
+                            allInfoProvided = false;
+
+                            setLoading2(false);
+                          },
+                          disabled: !allInfoProvided && !editExpense,
+                        ),
+                      ),
+                    ),
+                  ]),
+                ),
                 const Spacer(flex: 14),
               ],
             ),
@@ -267,7 +375,7 @@ class CategoriesPicker extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: categories
                     .map(
-                      (c) => ButtonIcon(
+                      (c) => ButtonIconL(
                         text: c.name,
                         subtext: c.description,
                         icon: c.icon,
@@ -293,10 +401,10 @@ class CategoriesPicker extends StatelessWidget {
   }
 }
 
-class DateTimePicker extends StatelessWidget {
+class DateTimePickerExpenses extends StatelessWidget {
   final ExpensesState expensesState;
 
-  const DateTimePicker({super.key, required this.expensesState});
+  const DateTimePickerExpenses({super.key, required this.expensesState});
 
   @override
   Widget build(BuildContext context) {

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:Balancer/expenses/expenses_state.dart';
+import 'package:Balancer/history/history_state.dart';
 import 'package:Balancer/profile/profile_state.dart';
+import 'package:Balancer/shared/foreground.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +14,6 @@ import 'package:Balancer/services/app_preferences.dart';
 import 'package:Balancer/services/firestore.dart';
 import 'package:Balancer/services/messaging.dart';
 import 'package:Balancer/shared/error.dart';
-import 'package:Balancer/shared/loading.dart';
 import 'package:Balancer/services/models.dart';
 import 'package:Balancer/theme.dart';
 import 'package:provider/provider.dart';
@@ -23,7 +24,6 @@ import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await AppPreferences.init();
 
   // runApp(
   //   DevicePreview(
@@ -123,20 +123,33 @@ class _AppState extends State<App> {
           if (snapshot.connectionState == ConnectionState.done) {
             MessagingService().initialize();
 
-            return MultiProvider(
-              providers: [
-                ChangeNotifierProvider(create: (_) => ProfileState()),
-                ChangeNotifierProvider(create: (_) => ExpensesState()),
-                StreamProvider(
-                  create: (_) => FirestoreService().streamUser(),
-                  initialData: MyUser(),
-                ),
-              ],
-              child: MaterialApp(routes: appRoutes, theme: appTheme),
-            );
-          }
+            return FutureBuilder(
+                future: AppPreferences.init(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: ErrorMessage(
+                        message: snapshot.error.toString(),
+                      ),
+                    );
+                  }
 
-          return MediaQuery(data: const MediaQueryData(), child: MaterialApp(theme: appTheme, home: const LoadingScreen()));
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    return MultiProvider(
+                      providers: [
+                        ChangeNotifierProvider(create: (_) => ProfileState()),
+                        ChangeNotifierProvider(create: (_) => ExpensesState()),
+                        ChangeNotifierProvider(create: (_) => HistoryState()),
+                        StreamProvider(create: (_) => FirestoreService().streamUser(), initialData: MyUser()),
+                      ],
+                      child: MaterialApp(routes: appRoutes, theme: appTheme),
+                    );
+                  }
+
+                  return MediaQuery(data: const MediaQueryData(), child: MaterialApp(theme: appTheme, home: const ForegroundScreen()));
+                });
+          }
+          return MediaQuery(data: const MediaQueryData(), child: MaterialApp(theme: appTheme, home: const ForegroundScreen()));
         },
       ),
     );

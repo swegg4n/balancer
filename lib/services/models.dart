@@ -19,10 +19,8 @@ class MyUser {
 class Household {
   final String userId1;
   final String userId2;
-  final List<String> expensesIdsUser1;
-  final List<String> expensesIdsUser2;
 
-  Household({this.userId1 = '', this.userId2 = '', this.expensesIdsUser1 = const [], this.expensesIdsUser2 = const []});
+  Household({this.userId1 = '', this.userId2 = ''});
 
   factory Household.fromJson(Map<String, dynamic> json) => _$HouseholdFromJson(json);
   Map<String, dynamic> toJson() => _$HouseholdToJson(this);
@@ -34,10 +32,12 @@ class Expense {
   final double amount;
   final int categoryIndex;
   double split;
-  final String date;
+  final int epoch;
   String userId;
+  String householdId;
 
-  Expense({this.description = '', this.amount = 0, this.categoryIndex = 0, this.split = 0.5, this.date = '', this.userId = ''});
+  Expense(
+      {this.description = '', this.amount = 0, this.categoryIndex = 0, this.split = 0.5, this.epoch = 0, this.userId = '', this.householdId = ''});
 
   factory Expense.fromJson(Map<String, dynamic> json) => _$ExpenseFromJson(json);
   Map<String, dynamic> toJson() => _$ExpenseToJson(this);

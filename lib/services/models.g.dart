@@ -25,21 +25,11 @@ Map<String, dynamic> _$MyUserToJson(MyUser instance) => <String, dynamic>{
 Household _$HouseholdFromJson(Map<String, dynamic> json) => Household(
       userId1: json['userId1'] as String? ?? '',
       userId2: json['userId2'] as String? ?? '',
-      expensesIdsUser1: (json['expensesIdsUser1'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
-      expensesIdsUser2: (json['expensesIdsUser2'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
     );
 
 Map<String, dynamic> _$HouseholdToJson(Household instance) => <String, dynamic>{
       'userId1': instance.userId1,
       'userId2': instance.userId2,
-      'expensesIdsUser1': instance.expensesIdsUser1,
-      'expensesIdsUser2': instance.expensesIdsUser2,
     };
 
 Expense _$ExpenseFromJson(Map<String, dynamic> json) => Expense(
@@ -47,8 +37,9 @@ Expense _$ExpenseFromJson(Map<String, dynamic> json) => Expense(
       amount: (json['amount'] as num?)?.toDouble() ?? 0,
       categoryIndex: json['categoryIndex'] as int? ?? 0,
       split: (json['split'] as num?)?.toDouble() ?? 0.5,
-      date: json['date'] as String? ?? '',
+      epoch: json['epoch'] as int? ?? 0,
       userId: json['userId'] as String? ?? '',
+      householdId: json['householdId'] as String? ?? '',
     );
 
 Map<String, dynamic> _$ExpenseToJson(Expense instance) => <String, dynamic>{
@@ -56,6 +47,7 @@ Map<String, dynamic> _$ExpenseToJson(Expense instance) => <String, dynamic>{
       'amount': instance.amount,
       'categoryIndex': instance.categoryIndex,
       'split': instance.split,
-      'date': instance.date,
+      'epoch': instance.epoch,
       'userId': instance.userId,
+      'householdId': instance.householdId,
     };
