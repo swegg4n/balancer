@@ -34,6 +34,9 @@ class FirestoreService {
 
   Future<bool> createExpense(Expense expense) async {
     User user = AuthService().user!;
+
+    AppPreferences.householdId ??= await FirestoreService().getHouseholdId();
+
     var expense_data = {
       'description': expense.description,
       'amount': expense.amount,

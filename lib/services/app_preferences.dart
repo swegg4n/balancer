@@ -1,14 +1,12 @@
-import 'package:Balancer/services/firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-
-import 'auth.dart';
 
 class AppPreferences {
   static late SharedPreferences _prefs;
   static late PackageInfo packageInfo;
   static late String appVersion;
-  static late String householdId;
+  static String? householdId;
 
   static Future init() async {
     packageInfo = await PackageInfo.fromPlatform();
@@ -22,7 +20,33 @@ class AppPreferences {
     buildNumber = packageInfo.buildNumber;
 
     appVersion = "version $version ($buildNumber)";
+  }
 
-    householdId = await FirestoreService().getHouseholdId();
+  static const String _expenseDatesHistoryKey = 'expenseDatesHistoryKey';
+  static List<String> getExpenseDatesHistory() {
+    Object? obj = _prefs.get(_expenseDatesHistoryKey) ?? [];
+    List<String> list = (obj as List<dynamic>).map((item) => item as String).toList();
+
+    for (var e in list) {
+      debugPrint(e);
+    }
+    debugPrint('-');
+    return list;
+  }
+
+  static Future<void> addExpenseDate(String date) async {
+    List<String> existingDates = getExpenseDatesHistory();
+    if (!existingDates.contains(date)) {
+      existingDates.add(date);
+      await _prefs.setStringList(_expenseDatesHistoryKey, existingDates);
+    }
+  }
+
+  static Future<void> removeExpenseDate(String date) async {
+    List<String> existingDates = getExpenseDatesHistory();
+    if (existingDates.contains(date)) {
+      existingDates.remove(date);
+      await _prefs.setStringList(_expenseDatesHistoryKey, existingDates);
+    }
   }
 }
