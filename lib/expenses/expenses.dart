@@ -73,7 +73,7 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       var expensesState = Provider.of<ExpensesState>(context, listen: false);
 
       if (widget.existingExpense != null) {
@@ -82,6 +82,7 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
         descriptionController.text = widget.existingExpense!.description;
         amountController.text = widget.existingExpense!.amount.round().toString();
         splitPct = (widget.existingExpense!.split * 100).roundToDouble();
+        expensesState.starred = await FirestoreService().starredDocumentExists(widget.documentId);
       }
     });
   }
@@ -89,6 +90,7 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
   @override
   Widget build(BuildContext context) {
     var expensesState = Provider.of<ExpensesState>(context);
+
     String date = expensesState.selectedDate.toString().split(' ')[0];
 
     bool editExpense = widget.existingExpense != null;
@@ -112,6 +114,20 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
                 Navigator.pop(context);
               },
             ),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 15),
+                child: IconButton(
+                    onPressed: () {
+                      expensesState.toggleStarred();
+                    },
+                    icon: Icon(
+                      size: 22,
+                      expensesState.starred ? FontAwesomeIcons.solidStar : FontAwesomeIcons.star,
+                      fill: 1,
+                    )),
+              )
+            ],
             backgroundColor: Colors.grey[850],
           ),
           body: Container(
@@ -252,28 +268,28 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
                         );
 
                         if (editExpense) {
-                          success = await FirestoreService().updateExpense(newExpense, widget.documentId!);
+                          success = await FirestoreService().updateExpense(newExpense, widget.documentId!, expensesState.starred);
                         } else {
-                          success = await FirestoreService().createExpense(newExpense);
+                          success = await FirestoreService().createExpense(newExpense, expensesState.starred);
                         }
 
                         if (success) {
                           BottomModal.showSuccessModal(context, 'Success!', editExpense ? 'The expense was updated' : 'The expense was added');
+
+                          if (editExpense) {
+                            await Future.delayed(Duration(seconds: 2));
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                          }
+
+                          expensesState.reset();
+                          descriptionController.text = '';
+                          amountController.text = '';
+                          splitPct = 50;
+                          allInfoProvided = false;
                         } else {
                           BottomModal.showErrorModal(context, 'Failed to ${editExpense ? 'edit' : 'add'} expense', 'Please try again');
                         }
-
-                        if (editExpense) {
-                          await Future.delayed(Duration(seconds: 2));
-                          Navigator.pop(context);
-                          Navigator.pop(context);
-                        }
-
-                        expensesState.reset();
-                        descriptionController.text = '';
-                        amountController.text = '';
-                        splitPct = 50;
-                        allInfoProvided = false;
 
                         setLoading(false);
                       },
@@ -315,21 +331,21 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
 
                             if (success) {
                               BottomModal.showSuccessModal(context, 'Success!', 'The expense was deleted');
+
+                              if (editExpense) {
+                                await Future.delayed(Duration(seconds: 2));
+                                Navigator.pop(context);
+                                Navigator.pop(context);
+                              }
+
+                              expensesState.reset();
+                              descriptionController.text = '';
+                              amountController.text = '';
+                              splitPct = 50;
+                              allInfoProvided = false;
                             } else {
                               BottomModal.showErrorModal(context, 'Failed to delete expense', 'Please try again');
                             }
-
-                            if (editExpense) {
-                              await Future.delayed(Duration(seconds: 2));
-                              Navigator.pop(context);
-                              Navigator.pop(context);
-                            }
-
-                            expensesState.reset();
-                            descriptionController.text = '';
-                            amountController.text = '';
-                            splitPct = 50;
-                            allInfoProvided = false;
 
                             setLoading2(false);
                           },

@@ -16,8 +16,21 @@ class ExpensesState with ChangeNotifier {
     notifyListeners();
   }
 
+  bool _starred = false;
+  bool get starred => _starred;
+  void set starred(bool value) {
+    _starred = value;
+    notifyListeners();
+  }
+
+  void toggleStarred() {
+    _starred = !_starred;
+    notifyListeners();
+  }
+
   void reset() {
     _selectedDate = DateTime.now();
     _selectedCategory = categories[0];
+    _starred = false;
   }
 }

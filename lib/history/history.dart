@@ -176,28 +176,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
   List<Expense> expenses = [];
   List<String> documentIds = [];
   late QuerySnapshot collectionState;
+
   Future<void> getDocuments() async {
-    AppPreferences.householdId ??= await FirestoreService().getHouseholdId();
     expenses = [];
     documentIds = [];
-    var collection = FirebaseFirestore.instance
-        .collection('expenses')
-        .where('householdId', isEqualTo: AppPreferences.householdId)
-        .orderBy("epoch", descending: true)
-        .limit(10);
+    var collection = await FirestoreService().getDocuments();
     fetchDocuments(collection);
   }
 
   Future<void> getDocumentsNext() async {
-    AppPreferences.householdId ??= await FirestoreService().getHouseholdId();
     debugPrint(collectionState.docs.length.toString());
     var lastVisible = collectionState.docs[collectionState.docs.length - 1];
-    var collection = FirebaseFirestore.instance
-        .collection('expenses')
-        .where('householdId', isEqualTo: AppPreferences.householdId)
-        .orderBy("epoch", descending: true)
-        .startAfterDocument(lastVisible)
-        .limit(5);
+    var collection = await FirestoreService().getDocumentsNext(lastVisible);
     fetchDocuments(collection);
   }
 
@@ -208,113 +198,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
         setState(() {
           expenses.add(Expense.fromJson(element.data() as Map<String, dynamic>));
           documentIds.add(element.reference.id);
-          for (var expense in expenses) {
-            DateTime expenseDate = DateTime.fromMillisecondsSinceEpoch(expense.epoch);
-            String expenseDateString =
-                '${expenseDate.year.toString().padLeft(2, '0')}-${expenseDate.month.toString().padLeft(2, '0')}-${expenseDate.day.toString().padLeft(2, '0')}';
-            AppPreferences.addExpenseDate(expenseDateString);
-          }
         });
       });
     });
   }
 }
-
-// class HistoryScreen_ extends StatelessWidget {
-//   const HistoryScreen_({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     var historyState = Provider.of<HistoryState>(context);
-
-//     // var household = Provider.of<Household>(context);
-
-//     // List<Expense> expenses = List.from(household.expenses);
-//     // expenses.sort((b, a) => a.epoch.compareTo(b.epoch));
-//     // List<DateTime> expensesDates = expenses.map((e) => DateTime.fromMillisecondsSinceEpoch(e.epoch)).toList();
-
-//     return Scaffold(
-//       floatingActionButton: const NewExpenseButton(heroTag: "floating_history"),
-//       body: Container(
-//         margin: const EdgeInsets.only(top: 55, left: 15, right: 15, bottom: 30),
-//         child: Column(
-//           children: [
-//             Padding(
-//               padding: const EdgeInsets.only(left: 10, right: 10, top: 0, bottom: 20),
-//               child: Row(
-//                 children: [
-//                   Expanded(
-//                     child: Wrap(
-//                       spacing: 10,
-//                       children: [
-//                         ChipButton(category: categories[0], historyState: historyState),
-//                         ChipButton(category: categories[1], historyState: historyState),
-//                         ChipButton(category: categories[2], historyState: historyState),
-//                         ChipButton(category: categories[3], historyState: historyState),
-//                         ChipButton(category: categories[4], historyState: historyState),
-//                         ChipButton(category: categories[5], historyState: historyState),
-//                       ],
-//                     ),
-//                   ),
-//                   Column(
-//                     children: [
-//                       SizedBox(
-//                         width: 65,
-//                         child: CategoryButton(
-//                           backgroundColor: Colors.grey[850],
-//                           icon: FontAwesomeIcons.calendar,
-//                           iconSize: 30,
-//                           iconColor: Colors.white,
-//                           onPressed: () {
-//                             // showDialog(
-//                             //     context: context,
-//                             //     builder: (context) => DateTimePickerHistory(historyState: historyState, expenseDates: expensesDates));
-//                           },
-//                         ),
-//                       ),
-//                       const Padding(padding: EdgeInsets.only(bottom: 5)),
-//                       Text(historyState.fromDate.toString().split(' ')[0], style: const TextStyle(fontSize: 16)),
-//                       Button(
-//                         text: 'today',
-//                         onPressed: () {
-//                           historyState.fromDate = DateTime.now();
-//                         },
-//                         paddingVertical: 3,
-//                         fontSize: 16,
-//                         color: Theme.of(context).primaryColor,
-//                       ),
-//                     ],
-//                   ),
-//                 ],
-//               ),
-//             ),
-//             // Expanded(
-//             //   flex: 9,
-//             //   child: ListView.builder(
-//             //     padding: EdgeInsets.zero,
-//             //     itemCount: expenses.length,
-//             //     scrollDirection: Axis.vertical,
-//             //     itemBuilder: (context, index) {
-//             //       if (historyState.selectedCategories[expenses[index].categoryIndex] == false) return const SizedBox.shrink();
-//             //       if (expensesDates[index].isLaterDate(historyState.fromDate)) return const SizedBox.shrink();
-
-//             //       if (index == expenses.length - 1) {
-//             //         return Padding(
-//             //           padding: const EdgeInsets.only(bottom: 50),
-//             //           child: ExpenseItem(expense: expenses[index], idx: index),
-//             //         );
-//             //       } else {
-//             //         return ExpenseItem(expense: expenses[index], idx: index);
-//             //       }
-//             //     },
-//             //   ),
-//             // ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
 
 extension DateOnlyCompare on DateTime {
   bool isLaterDate(DateTime other) {
@@ -326,15 +214,39 @@ extension DateOnlyCompare on DateTime {
   }
 }
 
-class DateTimePickerHistory extends StatelessWidget {
+class DateTimePickerHistory extends StatefulWidget {
   final HistoryState historyState;
+  List<DateTime> starredDates = [];
 
-  const DateTimePickerHistory({super.key, required this.historyState});
+  DateTimePickerHistory({super.key, required this.historyState});
+
+  @override
+  State<DateTimePickerHistory> createState() => _DateTimePickerHistoryState();
+}
+
+class _DateTimePickerHistoryState extends State<DateTimePickerHistory> {
+  @override
+  void initState() {
+    super.initState();
+    _getStarredDates();
+  }
+
+  _getStarredDates() async {
+    var ref = await FirestoreService().getStarredDocuments();
+    ref.get().then((value) {
+      value.docs.forEach((element) {
+        setState(() {
+          Expense starredExpense = Expense.fromJson(element.data());
+          DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(starredExpense.epoch);
+          widget.starredDates.add(dateTime);
+          debugPrint(dateTime.toString());
+        });
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    List<DateTime> specialDates = AppPreferences.getExpenseDatesHistory().map((item) => DateTime.parse(item)).toList();
-
     return FractionallySizedBox(
       heightFactor: 0.4,
       widthFactor: 0.8,
@@ -345,21 +257,23 @@ class DateTimePickerHistory extends StatelessWidget {
           color: Colors.grey[850],
         ),
         child: SfDateRangePicker(
+          maxDate: DateTime.now().add(const Duration(days: 365)), // hacky way of redrawing the UI
           onSelectionChanged: (DateRangePickerSelectionChangedArgs args) {
             DateTime selectedDate = args.value;
-            historyState.fromDate = selectedDate;
+            widget.historyState.fromDate = selectedDate;
             Navigator.pop(context);
           },
           selectionMode: DateRangePickerSelectionMode.single,
           showNavigationArrow: true,
-          monthViewSettings: DateRangePickerMonthViewSettings(firstDayOfWeek: 1, showWeekNumber: true, specialDates: specialDates),
+          monthViewSettings: DateRangePickerMonthViewSettings(
+              firstDayOfWeek: 1, showWeekNumber: true, weekNumberStyle: const DateRangePickerWeekNumberStyle(), specialDates: widget.starredDates),
           monthCellStyle: DateRangePickerMonthCellStyle(
             specialDatesDecoration:
                 BoxDecoration(color: Colors.transparent, border: Border.all(color: Colors.grey[700]!, width: 1), shape: BoxShape.circle),
             specialDatesTextStyle: const TextStyle(color: Colors.white),
             textStyle: const TextStyle(color: Colors.grey),
           ),
-          initialSelectedDate: historyState.fromDate,
+          initialSelectedDate: widget.historyState.fromDate,
         ),
       ),
     );

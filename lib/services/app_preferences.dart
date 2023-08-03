@@ -21,32 +21,4 @@ class AppPreferences {
 
     appVersion = "version $version ($buildNumber)";
   }
-
-  static const String _expenseDatesHistoryKey = 'expenseDatesHistoryKey';
-  static List<String> getExpenseDatesHistory() {
-    Object? obj = _prefs.get(_expenseDatesHistoryKey) ?? [];
-    List<String> list = (obj as List<dynamic>).map((item) => item as String).toList();
-
-    for (var e in list) {
-      debugPrint(e);
-    }
-    debugPrint('-');
-    return list;
-  }
-
-  static Future<void> addExpenseDate(String date) async {
-    List<String> existingDates = getExpenseDatesHistory();
-    if (!existingDates.contains(date)) {
-      existingDates.add(date);
-      await _prefs.setStringList(_expenseDatesHistoryKey, existingDates);
-    }
-  }
-
-  static Future<void> removeExpenseDate(String date) async {
-    List<String> existingDates = getExpenseDatesHistory();
-    if (existingDates.contains(date)) {
-      existingDates.remove(date);
-      await _prefs.setStringList(_expenseDatesHistoryKey, existingDates);
-    }
-  }
 }

@@ -21,23 +21,45 @@ class FirestoreService {
     return doc.get('household');
   }
 
-  // Stream<Household> streamHousehold() {
-  //   return AuthService().userStream.switchMap((user) {
-  //     if (user != null && AppPreferences.householdId != '') {
-  //       var ref = _db.collection('households').doc(AppPreferences.householdId);
-  //       return ref.snapshots().map((doc) => Household.fromJson(doc.data()!));
-  //     } else {
-  //       return Stream.fromIterable([Household()]);
-  //     }
-  //   });
-  // }
+  Future<bool> starredDocumentExists(id) async {
+    var ref = _db.collection('expenses_starred').doc(id);
+    var data = (await ref.get()).data();
+    return data != null;
+  }
 
-  Future<bool> createExpense(Expense expense) async {
+  Future<Query<Map<String, dynamic>>> getDocuments() async {
+    AppPreferences.householdId ??= await FirestoreService().getHouseholdId();
+    var collection = FirebaseFirestore.instance
+        .collection('expenses')
+        .where('householdId', isEqualTo: AppPreferences.householdId)
+        .orderBy("epoch", descending: true)
+        .limit(10);
+    return collection;
+  }
+
+  Future<Query<Map<String, dynamic>>> getStarredDocuments() async {
+    AppPreferences.householdId ??= await FirestoreService().getHouseholdId();
+    var collection = FirebaseFirestore.instance.collection('expenses_starred').where('householdId', isEqualTo: AppPreferences.householdId);
+    return collection;
+  }
+
+  Future<Query<Map<String, dynamic>>> getDocumentsNext(dynamic startAfter) async {
+    AppPreferences.householdId ??= await FirestoreService().getHouseholdId();
+    var collection = FirebaseFirestore.instance
+        .collection('expenses')
+        .where('householdId', isEqualTo: AppPreferences.householdId)
+        .orderBy("epoch", descending: true)
+        .startAfterDocument(startAfter)
+        .limit(5);
+    return collection;
+  }
+
+  Future<bool> createExpense(Expense expense, bool starred) async {
     User user = AuthService().user!;
 
     AppPreferences.householdId ??= await FirestoreService().getHouseholdId();
 
-    var expense_data = {
+    var expenseData = {
       'description': expense.description,
       'amount': expense.amount,
       'categoryIndex': expense.categoryIndex,
@@ -48,13 +70,19 @@ class FirestoreService {
     };
 
     var ref = _db.collection('expenses').doc();
-    ref.set(expense_data);
+    String id = ref.id;
+    ref.set(expenseData);
+
+    if (starred) {
+      ref = _db.collection('expenses_starred').doc(id);
+      ref.set(expenseData);
+    }
 
     return true;
   }
 
-  Future<bool> updateExpense(Expense expense, String documentId) async {
-    var expense_data = {
+  Future<bool> updateExpense(Expense expense, String documentId, bool starred) async {
+    var expenseData = {
       'description': expense.description,
       'amount': expense.amount,
       'categoryIndex': expense.categoryIndex,
@@ -63,12 +91,32 @@ class FirestoreService {
     };
 
     var ref = _db.collection('expenses').doc(documentId);
-    ref.update(expense_data);
+    ref.update(expenseData);
+
+    bool docExists = await starredDocumentExists(documentId);
+    if (starred && !docExists) {
+      ref = _db.collection('expenses_starred').doc(documentId);
+      ref.set(expenseData);
+    } else if (!starred && docExists) {
+      deleteStarredExpense(documentId);
+    }
+
     return true;
   }
 
   Future<bool> deleteExpense(String documentId) async {
     var ref = _db.collection('expenses').doc(documentId);
+    await ref.delete();
+
+    if (await starredDocumentExists(documentId)) {
+      deleteStarredExpense(documentId);
+    }
+
+    return true;
+  }
+
+  Future<bool> deleteStarredExpense(String documentId) async {
+    var ref = _db.collection('expenses_starred').doc(documentId);
     await ref.delete();
     return true;
   }
@@ -123,7 +171,7 @@ class FirestoreService {
 
       final snapshot = await uploadTask.whenComplete(() {});
       pfpUrl = await snapshot.ref.getDownloadURL();
-      debugPrint('uploaded profile picture to url: ' + pfpUrl);
+      debugPrint('uploaded profile picture to url: $pfpUrl');
     }
 
     var ref = _db.collection('users').doc(user.uid);
