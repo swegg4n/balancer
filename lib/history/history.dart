@@ -1,7 +1,6 @@
 import 'package:Balancer/expenses/categories.dart';
 import 'package:Balancer/expenses/expenses.dart';
 import 'package:Balancer/history/history_state.dart';
-import 'package:Balancer/services/app_preferences.dart';
 import 'package:Balancer/services/firestore.dart';
 import 'package:Balancer/services/models.dart';
 import 'package:Balancer/shared/button.dart';
@@ -61,7 +60,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   void initState() {
     super.initState();
-    getDocuments();
+    getDocumentsAfter(DateTime.now().getDay().add(const Duration(days: 1)).millisecondsSinceEpoch - 1);
     scrollController.addListener(() {
       if (scrollController.position.atEdge) {
         if (scrollController.position.pixels != 0) {
@@ -74,6 +73,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     var historyState = Provider.of<HistoryState>(context);
+
+    callback() {
+      getDocumentsAfter(historyState.fromDate.getDay().add(const Duration(days: 1)).millisecondsSinceEpoch - 1);
+    }
 
     return Scaffold(
       floatingActionButton: const NewExpenseButton(heroTag: "floating_history"),
@@ -107,7 +110,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         iconSize: 30,
                         iconColor: Colors.white,
                         onPressed: () {
-                          showDialog(context: context, builder: (context) => DateTimePickerHistory(historyState: historyState));
+                          showDialog(
+                              context: context,
+                              builder: (context) =>
+                                  DateTimePickerHistory(historyState: historyState, scrollController: scrollController, callback: callback));
                         },
                       ),
                     ),
@@ -117,7 +123,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       text: 'today',
                       onPressed: () {
                         historyState.fromDate = DateTime.now();
+                        getDocumentsAfter(historyState.fromDate.getDay().add(const Duration(days: 1)).millisecondsSinceEpoch - 1);
                       },
+                      disabled: historyState.fromDate.isSameDate(DateTime.now()),
                       paddingVertical: 3,
                       fontSize: 16,
                       color: Theme.of(context).primaryColor,
@@ -131,13 +139,23 @@ class _HistoryScreenState extends State<HistoryScreen> {
             flex: 9,
             child: expenses.isNotEmpty
                 ? RefreshIndicator(
-                    onRefresh: getDocuments,
+                    onRefresh: () async {
+                      historyState.fromDate = DateTime.now();
+                      getDocumentsAfter(historyState.fromDate.getDay().add(const Duration(days: 1)).millisecondsSinceEpoch - 1);
+                    },
                     child: ListView.builder(
                       padding: EdgeInsets.zero,
                       physics: const AlwaysScrollableScrollPhysics(),
                       controller: scrollController,
                       itemCount: expenses.length,
                       itemBuilder: (context, index) {
+                        if (DateTime.fromMillisecondsSinceEpoch(expenses[index].epoch).isLaterDate(historyState.fromDate)) {
+                          return const SizedBox.shrink();
+                        }
+                        if (historyState.selectedCategories[expenses[index].categoryIndex] == false) {
+                          return const SizedBox.shrink();
+                        }
+
                         if (index == expenses.length - 1) {
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 80),
@@ -149,23 +167,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       },
                     ),
                   )
-                : Stack(
-                    alignment: Alignment.topCenter,
-                    children: [
-                      RefreshIndicator(
-                        onRefresh: getDocuments,
-                        child: ListView.builder(
-                          padding: EdgeInsets.zero,
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          itemCount: 0,
-                          itemBuilder: (context, index) => null,
-                        ),
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.only(top: 30),
-                        child: Text('Nothing to show ):', style: TextStyle(fontSize: 20)),
-                      ),
-                    ],
+                : RefreshIndicator(
+                    onRefresh: () async {
+                      historyState.fromDate = DateTime.now();
+                      getDocumentsAfter(historyState.fromDate.getDay().add(const Duration(days: 1)).millisecondsSinceEpoch - 1);
+                    },
+                    child: ListView.builder(
+                      padding: EdgeInsets.zero,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: 0,
+                      itemBuilder: (context, index) => null,
+                    ),
                   ),
           ),
         ]),
@@ -177,15 +189,19 @@ class _HistoryScreenState extends State<HistoryScreen> {
   List<String> documentIds = [];
   late QuerySnapshot collectionState;
 
-  Future<void> getDocuments() async {
+  Future<void> getDocumentsAfter(int epoch) async {
     expenses = [];
     documentIds = [];
-    var collection = await FirestoreService().getDocuments();
+    var collection = await FirestoreService().getDocumentsAfter(epoch);
     fetchDocuments(collection);
   }
 
   Future<void> getDocumentsNext() async {
     debugPrint(collectionState.docs.length.toString());
+
+    if (collectionState.docs.length < 5) {
+      debugPrint('nothing more to show');
+    }
     var lastVisible = collectionState.docs[collectionState.docs.length - 1];
     var collection = await FirestoreService().getDocumentsNext(lastVisible);
     fetchDocuments(collection);
@@ -214,11 +230,20 @@ extension DateOnlyCompare on DateTime {
   }
 }
 
+extension Day on DateTime {
+  DateTime getDay() {
+    return DateTime(year, month, day);
+  }
+}
+
+// ignore: must_be_immutable
 class DateTimePickerHistory extends StatefulWidget {
   final HistoryState historyState;
   List<DateTime> starredDates = [];
+  ScrollController scrollController;
+  final dynamic callback;
 
-  DateTimePickerHistory({super.key, required this.historyState});
+  DateTimePickerHistory({super.key, required this.historyState, required this.scrollController, required this.callback});
 
   @override
   State<DateTimePickerHistory> createState() => _DateTimePickerHistoryState();
@@ -239,7 +264,6 @@ class _DateTimePickerHistoryState extends State<DateTimePickerHistory> {
           Expense starredExpense = Expense.fromJson(element.data());
           DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(starredExpense.epoch);
           widget.starredDates.add(dateTime);
-          debugPrint(dateTime.toString());
         });
       });
     });
@@ -262,6 +286,8 @@ class _DateTimePickerHistoryState extends State<DateTimePickerHistory> {
             DateTime selectedDate = args.value;
             widget.historyState.fromDate = selectedDate;
             Navigator.pop(context);
+            widget.callback();
+            widget.scrollController.jumpTo(widget.scrollController.position.minScrollExtent);
           },
           selectionMode: DateRangePickerSelectionMode.single,
           showNavigationArrow: true,

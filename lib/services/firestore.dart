@@ -21,25 +21,14 @@ class FirestoreService {
     return doc.get('household');
   }
 
-  Future<bool> starredDocumentExists(id) async {
-    var ref = _db.collection('expenses_starred').doc(id);
-    var data = (await ref.get()).data();
-    return data != null;
-  }
-
-  Future<Query<Map<String, dynamic>>> getDocuments() async {
+  Future<Query<Map<String, dynamic>>> getDocumentsAfter(int epoch) async {
     AppPreferences.householdId ??= await FirestoreService().getHouseholdId();
     var collection = FirebaseFirestore.instance
         .collection('expenses')
         .where('householdId', isEqualTo: AppPreferences.householdId)
+        .where("epoch", isLessThanOrEqualTo: epoch)
         .orderBy("epoch", descending: true)
         .limit(10);
-    return collection;
-  }
-
-  Future<Query<Map<String, dynamic>>> getStarredDocuments() async {
-    AppPreferences.householdId ??= await FirestoreService().getHouseholdId();
-    var collection = FirebaseFirestore.instance.collection('expenses_starred').where('householdId', isEqualTo: AppPreferences.householdId);
     return collection;
   }
 
@@ -51,6 +40,18 @@ class FirestoreService {
         .orderBy("epoch", descending: true)
         .startAfterDocument(startAfter)
         .limit(5);
+    return collection;
+  }
+
+  Future<bool> starredDocumentExists(id) async {
+    var ref = _db.collection('expenses_starred').doc(id);
+    var data = (await ref.get()).data();
+    return data != null;
+  }
+
+  Future<Query<Map<String, dynamic>>> getStarredDocuments() async {
+    AppPreferences.householdId ??= await FirestoreService().getHouseholdId();
+    var collection = FirebaseFirestore.instance.collection('expenses_starred').where('householdId', isEqualTo: AppPreferences.householdId);
     return collection;
   }
 
