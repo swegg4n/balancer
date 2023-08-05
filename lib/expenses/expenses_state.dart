@@ -28,6 +28,13 @@ class ExpensesState with ChangeNotifier {
     notifyListeners();
   }
 
+  bool _hasModifiedExpense = false;
+  bool get hasModifiedExpense => _hasModifiedExpense;
+  void set hasModifiedExpense(bool value) {
+    _hasModifiedExpense = value;
+    notifyListeners();
+  }
+
   void reset() {
     _selectedDate = DateTime.now();
     _selectedCategory = categories[0];

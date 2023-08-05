@@ -32,14 +32,21 @@ class FirestoreService {
     return collection;
   }
 
-  Future<Query<Map<String, dynamic>>> getDocumentsNext(dynamic startAfter) async {
+  Future<Query<Map<String, dynamic>>> getDocumentsNext(dynamic startAfter, List<bool> selectedCategories) async {
+    List<int> selectedIndices = [];
+    for (var i = 0; i < selectedCategories.length; i++) {
+      if (selectedCategories[i] == true) {
+        selectedIndices.add(i);
+      }
+    }
     AppPreferences.householdId ??= await FirestoreService().getHouseholdId();
     var collection = FirebaseFirestore.instance
         .collection('expenses')
         .where('householdId', isEqualTo: AppPreferences.householdId)
+        .where('categoryIndex', whereIn: selectedIndices)
         .orderBy("epoch", descending: true)
         .startAfterDocument(startAfter)
-        .limit(5);
+        .limit(10);
     return collection;
   }
 

@@ -61,6 +61,10 @@ class HomeScreen extends StatelessWidget {
                     currentIndex: homeState.selectedIndex,
                     onTap: (int idx) {
                       homeState.selectedIndex = idx;
+
+                      if (idx == 0) {
+                        debugPrint('Navigating to history');
+                      }
                     },
                     items: [
                       BottomNavigationBarItem(

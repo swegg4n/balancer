@@ -1,5 +1,6 @@
 import 'package:Balancer/expenses/categories.dart';
 import 'package:Balancer/expenses/expenses_state.dart';
+import 'package:Balancer/services/app_preferences.dart';
 import 'package:Balancer/services/bottom_modal.dart';
 import 'package:Balancer/services/firestore.dart';
 import 'package:Balancer/services/models.dart';
@@ -258,6 +259,8 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
                       onPressed: () async {
                         setLoading(true);
 
+                        FocusManager.instance.primaryFocus?.unfocus();
+
                         bool success = false;
                         Expense newExpense = Expense(
                           description: descriptionController.text,
@@ -275,6 +278,7 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
 
                         if (success) {
                           BottomModal.showSuccessModal(context, 'Success!', editExpense ? 'The expense was updated' : 'The expense was added');
+                          expensesState.hasModifiedExpense = true;
 
                           if (editExpense) {
                             await Future.delayed(Duration(seconds: 2));
@@ -331,6 +335,7 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
 
                             if (success) {
                               BottomModal.showSuccessModal(context, 'Success!', 'The expense was deleted');
+                              expensesState.hasModifiedExpense = true;
 
                               if (editExpense) {
                                 await Future.delayed(Duration(seconds: 2));

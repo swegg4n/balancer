@@ -1,3 +1,4 @@
+import 'package:Balancer/expenses/expenses.dart';
 import 'package:Balancer/profile/edit_profile.dart';
 import 'package:Balancer/profile/profile_state.dart';
 import 'package:Balancer/shared/button.dart';
@@ -13,6 +14,7 @@ class ProfileScreen extends StatelessWidget {
     var profileState = Provider.of<ProfileState>(context);
 
     return Scaffold(
+      floatingActionButton: const NewExpenseButton(heroTag: "floating_profile"),
       body: Container(
         margin: EdgeInsets.only(top: 60, left: 50, right: 50, bottom: 75),
         child: Column(
