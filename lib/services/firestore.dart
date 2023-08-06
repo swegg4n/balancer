@@ -21,6 +21,32 @@ class FirestoreService {
     return doc.get('household');
   }
 
+  Future<List<Expense>> getDocumentsBetween(int fromEpoch, int toEpoch) async {
+    AppPreferences.householdId ??= await FirestoreService().getHouseholdId();
+    var collection = FirebaseFirestore.instance
+        .collection('expenses')
+        .where('householdId', isEqualTo: AppPreferences.householdId)
+        .where("epoch", isGreaterThanOrEqualTo: fromEpoch)
+        .where("epoch", isLessThanOrEqualTo: toEpoch)
+        .orderBy("epoch", descending: true);
+
+    debugPrint('----- Expenses -----');
+    List<Expense> expenses = [];
+    await collection.get().then((value) {
+      value.docs.forEach((element) {
+        Expense expense = Expense.fromJson(element.data());
+        expenses.add(expense);
+      });
+    });
+
+    expenses.forEach((e) {
+      // debugPrint('${element.description} (${element.amount.toInt()} kr) - ${DateTime.fromMillisecondsSinceEpoch(element.epoch)}');
+      debugPrint('${e.description} (${e.amount.toInt()}kr@${e.split}) - ${e.categoryIndex}');
+    });
+    debugPrint('--------------------');
+    return expenses;
+  }
+
   Future<Query<Map<String, dynamic>>> getDocumentsAfter(int epoch) async {
     AppPreferences.householdId ??= await FirestoreService().getHouseholdId();
     var collection = FirebaseFirestore.instance
@@ -127,6 +153,28 @@ class FirestoreService {
     var ref = _db.collection('expenses_starred').doc(documentId);
     await ref.delete();
     return true;
+  }
+
+  Future<Household> getHousehold() async {
+    AppPreferences.householdId ??= await FirestoreService().getHouseholdId();
+    var doc = await _db.collection('households').doc(AppPreferences.householdId).get();
+    return Household.fromJson(doc.data()!);
+  }
+
+  Future<MyUser> getHouseholdUser() async {
+    User user = AuthService().user!;
+    Household household = await getHousehold();
+
+    String housemateId;
+    if (household.userId1 != user.uid) {
+      housemateId = household.userId1;
+    } else {
+      housemateId = household.userId2;
+    }
+
+    var doc = await _db.collection('users').doc(housemateId).get();
+    MyUser householdUser = MyUser.fromJson(doc.data()!);
+    return householdUser;
   }
 
   Stream<MyUser> streamUser() {

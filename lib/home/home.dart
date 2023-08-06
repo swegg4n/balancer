@@ -41,7 +41,7 @@ class HomeScreen extends StatelessWidget {
             } else {
               final screens = [
                 const HistoryScreen(),
-                const AnalyticsScreen(),
+                AnalyticsScreen(),
                 const ProfileScreen(),
               ];
 

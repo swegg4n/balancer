@@ -30,7 +30,8 @@ dependencies:
   google_fonts: ^4.0.4
   multi_value_listenable_builder: ^0.0.2
   syncfusion_flutter_datepicker: ^22.2.5
-
+  percent_indicator: ^4.0.1
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
