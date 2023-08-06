@@ -68,14 +68,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 Expanded(
                   child: Wrap(
                     spacing: 10,
-                    children: [
-                      ChipButton(category: categories[0], historyState: historyState, scrollController: scrollController),
-                      ChipButton(category: categories[1], historyState: historyState, scrollController: scrollController),
-                      ChipButton(category: categories[2], historyState: historyState, scrollController: scrollController),
-                      ChipButton(category: categories[3], historyState: historyState, scrollController: scrollController),
-                      ChipButton(category: categories[4], historyState: historyState, scrollController: scrollController),
-                      ChipButton(category: categories[5], historyState: historyState, scrollController: scrollController),
-                    ],
+                    children: List.generate(
+                        6, (index) => ChipButton(category: categories[index], historyState: historyState, scrollController: scrollController)),
                   ),
                 ),
                 Column(
@@ -252,6 +246,10 @@ extension DateOnlyCompare on DateTime {
     return (year > other.year) || (year == other.year && month > other.month) || (year == other.year && month == other.month && day > other.day);
   }
 
+  bool isLaterMonth(DateTime other) {
+    return (year > other.year) || (year == other.year && month > other.month);
+  }
+
   bool isSameDate(DateTime other) {
     return year == other.year && month == other.month && day == other.day;
   }
@@ -354,49 +352,55 @@ class ExpenseItem extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 5),
       child: ElevatedButton(
-        style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.grey[850]), padding: MaterialStateProperty.all(EdgeInsets.zero)),
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.all(Colors.grey[850]),
+          padding: MaterialStateProperty.all(EdgeInsets.zero),
+        ),
         onPressed: () {
           Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => UpdateExpenseScreen(expense, documentId)));
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 10),
-          child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-            Expanded(
-              flex: 1,
-              child: Icon(categories[expense.categoryIndex].icon, size: 24, color: categories[expense.categoryIndex].color),
-            ),
-            const Padding(padding: EdgeInsets.only(right: 10)),
-            Expanded(
-              flex: 6,
-              child: Text(
-                expense.description,
-                style: TextStyle(fontSize: 18, color: categories[expense.categoryIndex].color),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 1,
+                child: Icon(categories[expense.categoryIndex].icon, size: 24, color: categories[expense.categoryIndex].color),
               ),
-            ),
-            Expanded(
-              flex: 3,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  FittedBox(
-                    fit: BoxFit.fitWidth,
-                    child: Text(
-                      '${expense.amount.round().toString()} kr',
-                      style: TextStyle(fontSize: 20, color: categories[expense.categoryIndex].color),
-                      textAlign: TextAlign.right,
+              const Padding(padding: EdgeInsets.only(right: 10)),
+              Expanded(
+                flex: 6,
+                child: Text(
+                  expense.description,
+                  style: TextStyle(fontSize: 18, color: categories[expense.categoryIndex].color),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Expanded(
+                flex: 3,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.fitWidth,
+                      child: Text(
+                        '${expense.amount.round().toString()} kr',
+                        style: TextStyle(fontSize: 20, color: categories[expense.categoryIndex].color),
+                        textAlign: TextAlign.right,
+                      ),
                     ),
-                  ),
-                  Text(
-                    dateString,
-                    style: const TextStyle(fontSize: 14, color: Color(0xffcccccc)),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+                    Text(
+                      dateString,
+                      style: const TextStyle(fontSize: 14, color: Color(0xffcccccc)),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ]),
+            ],
+          ),
         ),
       ),
     );

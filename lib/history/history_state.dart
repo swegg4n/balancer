@@ -20,13 +20,6 @@ class HistoryState with ChangeNotifier {
     notifyListeners();
   }
 
-  bool refreshList_ = false;
-  bool get refreshList => refreshList_;
-  set refreshList(bool value) {
-    refreshList_ = value;
-    notifyListeners();
-  }
-
   bool listenerAdded_ = false;
   bool get listenerAdded => listenerAdded_;
   set listenerAdded(bool value) {
