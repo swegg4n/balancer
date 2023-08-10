@@ -15,8 +15,9 @@ class ProfileScreen extends StatelessWidget {
 
     return Scaffold(
       floatingActionButton: const NewExpenseButton(heroTag: "floating_profile"),
+      resizeToAvoidBottomInset: false,
       body: Container(
-        margin: EdgeInsets.only(top: 60, left: 50, right: 50, bottom: 75),
+        margin: const EdgeInsets.only(top: 60, left: 50, right: 50, bottom: 75),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

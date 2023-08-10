@@ -2,6 +2,7 @@ import 'package:Balancer/expenses/categories.dart';
 import 'package:Balancer/expenses/expenses.dart';
 import 'package:Balancer/expenses/expenses_state.dart';
 import 'package:Balancer/history/history_state.dart';
+import 'package:Balancer/services/auth.dart';
 import 'package:Balancer/services/firestore.dart';
 import 'package:Balancer/services/models.dart';
 import 'package:Balancer/shared/button.dart';
@@ -50,7 +51,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (expensesState.hasModifiedExpense) {
         historyState.fromDate = DateTime.now();
-        historyState.selectedCategories = [true, true, true, true, true, true];
+        historyState.selectedCategories = [true, true, true, true, true, true, true];
         getDocumentsAfter(historyState.fromDate.getDay().add(const Duration(days: 1)).millisecondsSinceEpoch - 1, null);
         expensesState.hasModifiedExpense = false;
       }
@@ -58,6 +59,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     return Scaffold(
       floatingActionButton: const NewExpenseButton(heroTag: "floating_history"),
+      resizeToAvoidBottomInset: false,
       body: Container(
         margin: const EdgeInsets.only(top: 55, left: 15, right: 15, bottom: 0),
         child: Column(children: [
@@ -112,7 +114,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               child: RefreshIndicator(
                 onRefresh: () async {
                   historyState.fromDate = DateTime.now();
-                  historyState.selectedCategories = [true, true, true, true, true, true];
+                  historyState.selectedCategories = [true, true, true, true, true, true, true];
                   getDocumentsAfter(historyState.fromDate.getDay().add(const Duration(days: 1)).millisecondsSinceEpoch - 1, historyState);
                 },
                 child: Builder(builder: (context) {
@@ -224,11 +226,11 @@ class ChipButton extends StatelessWidget {
       },
       onLongPress: () {
         if (historyState.selectedCategories.where((x) => x == true).length > 1 || historyState.selectedCategories[category.index] == false) {
-          List<bool> newSelection = [false, false, false, false, false, false];
+          List<bool> newSelection = [false, false, false, false, false, false, true];
           newSelection[category.index] = true;
           historyState.selectedCategories = newSelection;
         } else {
-          List<bool> newSelection = [true, true, true, true, true, true];
+          List<bool> newSelection = [true, true, true, true, true, true, true];
           historyState.selectedCategories = newSelection;
         }
         scrollController.jumpTo(scrollController.position.minScrollExtent);
@@ -349,6 +351,8 @@ class ExpenseItem extends StatelessWidget {
       dateString = date.toString().split(' ')[0];
     }
 
+    bool myExpense = expense.userId == AuthService().user!.uid;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 5),
       child: ElevatedButton(
@@ -360,10 +364,25 @@ class ExpenseItem extends StatelessWidget {
           Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => UpdateExpenseScreen(expense, documentId)));
         },
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 10),
+          padding: const EdgeInsets.only(right: 10, top: 10, bottom: 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
+              Container(
+                width: 5,
+                height: 50,
+                decoration: myExpense
+                    ? BoxDecoration(
+                        color: categories[expense.categoryIndex].color,
+                        borderRadius: const BorderRadius.horizontal(right: Radius.circular(5)),
+                      )
+                    : BoxDecoration(
+                        color: Colors.transparent,
+                        border: Border.all(color: categories[expense.categoryIndex].color, width: 0.5),
+                        borderRadius: const BorderRadius.horizontal(right: Radius.circular(5)),
+                      ),
+              ),
+              const Padding(padding: EdgeInsets.only(right: 10)),
               Expanded(
                 flex: 1,
                 child: Icon(categories[expense.categoryIndex].icon, size: 24, color: categories[expense.categoryIndex].color),

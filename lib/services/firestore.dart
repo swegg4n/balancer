@@ -59,7 +59,7 @@ class FirestoreService {
   }
 
   Future<Query<Map<String, dynamic>>> getDocumentsNext(dynamic startAfter, List<bool> selectedCategories) async {
-    List<int> selectedIndices = [];
+    List<int> selectedIndices = [6];
     for (var i = 0; i < selectedCategories.length; i++) {
       if (selectedCategories[i] == true) {
         selectedIndices.add(i);

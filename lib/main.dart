@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:Balancer/analytics/analytics_state.dart';
 import 'package:Balancer/expenses/expenses_state.dart';
 import 'package:Balancer/history/history_state.dart';
 import 'package:Balancer/profile/profile_state.dart';
@@ -140,6 +141,7 @@ class _AppState extends State<App> {
                         ChangeNotifierProvider(create: (_) => ProfileState()),
                         ChangeNotifierProvider(create: (_) => ExpensesState()),
                         ChangeNotifierProvider(create: (_) => HistoryState()),
+                        ChangeNotifierProvider(create: (_) => AnalyticsState()),
                         StreamProvider(create: (_) => FirestoreService().streamUser(), initialData: MyUser()),
                       ],
                       child: MaterialApp(routes: appRoutes, theme: appTheme),

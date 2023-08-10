@@ -1,4 +1,5 @@
 import 'package:Balancer/expenses/categories.dart';
+import 'package:Balancer/services/app_preferences.dart';
 import 'package:flutter/widgets.dart';
 
 class ExpensesState with ChangeNotifier {
@@ -37,7 +38,7 @@ class ExpensesState with ChangeNotifier {
 
   void reset() {
     _selectedDate = DateTime.now();
-    _selectedCategory = categories[0];
+    _selectedCategory = categories[AppPreferences.getLastCategoryIndex()];
     _starred = false;
   }
 }

@@ -11,6 +11,7 @@ import 'package:Balancer/services/auth.dart';
 import 'package:Balancer/shared/error.dart';
 import 'package:provider/provider.dart';
 
+import '../analytics/analytics_state.dart';
 import '../login/register.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -61,10 +62,6 @@ class HomeScreen extends StatelessWidget {
                     currentIndex: homeState.selectedIndex,
                     onTap: (int idx) {
                       homeState.selectedIndex = idx;
-
-                      if (idx == 0) {
-                        debugPrint('Navigating to history');
-                      }
                     },
                     items: [
                       BottomNavigationBarItem(

@@ -1,5 +1,6 @@
 import 'package:Balancer/expenses/categories.dart';
 import 'package:Balancer/expenses/expenses_state.dart';
+import 'package:Balancer/services/app_preferences.dart';
 import 'package:Balancer/services/bottom_modal.dart';
 import 'package:Balancer/services/firestore.dart';
 import 'package:Balancer/services/models.dart';
@@ -11,6 +12,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:provider/provider.dart';
+
+import '../analytics/analytics_state.dart';
 
 class NewExpenseButton extends StatelessWidget {
   final String heroTag;
@@ -83,6 +86,8 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
         amountController.text = widget.existingExpense!.amount.round().toString();
         splitPct = (widget.existingExpense!.split * 100).roundToDouble();
         expensesState.starred = await FirestoreService().starredDocumentExists(widget.documentId);
+      } else {
+        expensesState.selectedCategory = categories[AppPreferences.getLastCategoryIndex()];
       }
     });
   }
@@ -90,6 +95,7 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
   @override
   Widget build(BuildContext context) {
     var expensesState = Provider.of<ExpensesState>(context);
+    var analyticsState = Provider.of<AnalyticsState>(context);
 
     String date = expensesState.selectedDate.toString().split(' ')[0];
 
@@ -278,6 +284,7 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
                         if (success) {
                           BottomModal.showSuccessModal(context, 'Success!', editExpense ? 'The expense was updated' : 'The expense was added');
                           expensesState.hasModifiedExpense = true;
+                          analyticsState.hasModifiedDate = true;
 
                           if (editExpense) {
                             await Future.delayed(Duration(seconds: 2));
@@ -335,6 +342,7 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
                             if (success) {
                               BottomModal.showSuccessModal(context, 'Success!', 'The expense was deleted');
                               expensesState.hasModifiedExpense = true;
+                              analyticsState.hasModifiedDate = true;
 
                               if (editExpense) {
                                 await Future.delayed(Duration(seconds: 2));
@@ -406,6 +414,7 @@ class CategoriesPicker extends StatelessWidget {
                         color: Colors.grey[850],
                         onPressed: () {
                           expensesState.selectedCategory = categories[c.index];
+                          if (c.index != 6) AppPreferences.setLastCategoryIndex(c.index);
                           Navigator.pop(context);
                         },
                       ),
@@ -414,7 +423,7 @@ class CategoriesPicker extends StatelessWidget {
               ),
             ),
           ),
-          const Expanded(flex: 3, child: SizedBox()),
+          const Expanded(flex: 2, child: SizedBox()),
         ],
       ),
     );

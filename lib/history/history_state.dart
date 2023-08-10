@@ -8,7 +8,7 @@ class HistoryState with ChangeNotifier {
     notifyListeners();
   }
 
-  List<bool> _selectedCategories = [true, true, true, true, true, true];
+  List<bool> _selectedCategories = [true, true, true, true, true, true, true];
   List<bool> get selectedCategories => _selectedCategories;
   set selectedCategories(List<bool> values) {
     _selectedCategories = values;
@@ -36,7 +36,7 @@ class HistoryState with ChangeNotifier {
 
   void reset() {
     _fromDate = DateTime.now();
-    _selectedCategories = [true, true, true, true, true, true];
+    _selectedCategories = [true, true, true, true, true, true, true];
     _allDataFetched = false;
   }
 }

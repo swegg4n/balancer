@@ -19,4 +19,5 @@ List<Category> categories = [
   Category(index: 3, name: 'Home', icon: FontAwesomeIcons.houseChimney, color: Colors.green[200]!, description: 'repairs, furniture, utilities'),
   Category(index: 4, name: 'Life', icon: FontAwesomeIcons.gift, color: Colors.pink[200]!, description: 'clothes, insurance, gifts'),
   Category(index: 5, name: 'Transportation', icon: FontAwesomeIcons.car, color: Colors.brown[200]!, description: 'car, commute, parking'),
+  Category(index: 6, name: 'Adjustment', icon: FontAwesomeIcons.arrowRightLong, color: Colors.grey[200]!, description: ''),
 ];

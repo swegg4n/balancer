@@ -20,4 +20,14 @@ class AppPreferences {
 
     appVersion = "version $version ($buildNumber)";
   }
+
+  static const String _lastCategoryIndexKey = 'lastCategoryIndexKey';
+
+  static int getLastCategoryIndex() {
+    return _prefs.getInt(_lastCategoryIndexKey) ?? 0;
+  }
+
+  static Future<void> setLastCategoryIndex(int value) async {
+    await _prefs.setInt(_lastCategoryIndexKey, value);
+  }
 }
