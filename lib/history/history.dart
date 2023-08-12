@@ -57,6 +57,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
       }
     });
 
+    const chipSortOrder = [0, 3, 4, 1, 2, 5, 6, 7];
+
     return Scaffold(
       floatingActionButton: const NewExpenseButton(heroTag: "floating_history"),
       resizeToAvoidBottomInset: false,
@@ -71,7 +73,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   child: Wrap(
                     spacing: 10,
                     children: List.generate(
-                        6, (index) => ChipButton(category: categories[index], historyState: historyState, scrollController: scrollController)),
+                        7,
+                        (index) =>
+                            ChipButton(category: categories[chipSortOrder[index]], historyState: historyState, scrollController: scrollController)),
                   ),
                 ),
                 Column(
@@ -226,7 +230,7 @@ class ChipButton extends StatelessWidget {
       },
       onLongPress: () {
         if (historyState.selectedCategories.where((x) => x == true).length > 1 || historyState.selectedCategories[category.index] == false) {
-          List<bool> newSelection = [false, false, false, false, false, false, true];
+          List<bool> newSelection = [false, false, false, false, false, false, false];
           newSelection[category.index] = true;
           historyState.selectedCategories = newSelection;
         } else {
