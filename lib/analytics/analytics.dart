@@ -18,7 +18,7 @@ final monthNames = ['', 'January', 'February', 'March', 'April', 'May', 'June', 
 
 // ignore: must_be_immutable
 class AnalyticsScreen extends StatefulWidget {
-  final double iconSize = 65;
+  final double iconSize = 60;
   DateTime fromDateTime = DateTime.fromMillisecondsSinceEpoch(0);
   DateTime toDateTime = DateTime.fromMillisecondsSinceEpoch(0);
 
@@ -157,6 +157,15 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         analyticsState.hasModifiedDate = false;
       }
     });
+    double screenHeight = MediaQuery.of(context).size.height - 75 - 100;
+
+    // return Container(
+    //   margin: EdgeInsets.only(left: 25, right: 25, top: 60, bottom: 15),
+    //   child: SizedBox(
+    //     height: screenHeight,
+    //     child: Placeholder(),
+    //   ),
+    // );
 
     return FutureBuilder<List<Expense>>(
         future: _monthlyExpensesFuture,
@@ -176,161 +185,179 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     child: Container(
-                      margin: const EdgeInsets.only(top: 60, left: 25, right: 25, bottom: 0),
-                      height: MediaQuery.of(context).size.height - 130,
+                      height: screenHeight,
+                      margin: const EdgeInsets.only(top: 60, left: 25, right: 25, bottom: 15),
                       child: Column(
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              IconButton(
-                                  onPressed: () {
-                                    subtractMonth(analyticsState);
-                                    analyticsState.hasModifiedDate = true;
-                                  },
-                                  icon: const Icon(FontAwesomeIcons.angleLeft, size: 20)),
-                              Text('${monthNames[analyticsState.selectedDate.month]} ${analyticsState.selectedDate.year}',
-                                  style: const TextStyle(fontSize: 24)),
-                              IconButton(
-                                  onPressed: !DateTime.now().isLaterMonth(analyticsState.selectedDate)
-                                      ? null
-                                      : () {
-                                          addMonth(analyticsState);
-                                          analyticsState.hasModifiedDate = true;
-                                        },
-                                  icon: const Icon(FontAwesomeIcons.angleRight, size: 20)),
-                            ],
-                          ),
-                          const Padding(padding: EdgeInsets.only(bottom: 25)),
-                          Row(
-                            children: [
-                              Container(
-                                width: widget.iconSize,
-                                height: widget.iconSize,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[800],
-                                  shape: BoxShape.circle,
-                                  image: user.pfpUrl.isEmpty
-                                      ? null
-                                      : DecorationImage(
-                                          fit: BoxFit.cover,
-                                          image: NetworkImage(user.pfpUrl),
-                                        ),
-                                ),
-                              ),
-                              const Padding(padding: EdgeInsets.only(right: 15)),
-                              Expanded(
-                                  child: LinearPercentIndicator(
-                                percent: payFractionUser1,
-                                lineHeight: 40,
-                                barRadius: const Radius.circular(50),
-                                animation: true,
-                                center: Text('${(payFractionUser1 * 100).ceil()}%', style: const TextStyle(fontSize: 18)),
-                                backgroundColor: Colors.grey[800],
-                                progressColor: Colors.grey[600],
-                              )),
-                              SizedBox(
-                                width: 120,
-                                child: Column(
-                                  children: [
-                                    FittedBox(child: Text('$totalLentUser1 kr', style: const TextStyle(fontSize: 24))),
-                                    FittedBox(child: Text('($totalSumUser1 kr)', style: TextStyle(fontSize: 16, color: Colors.grey[400]))),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const Padding(padding: EdgeInsets.only(bottom: 10)),
-                          Row(
-                            children: [
-                              Container(
-                                width: widget.iconSize,
-                                height: widget.iconSize,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[800],
-                                  shape: BoxShape.circle,
-                                  image: !snapshot.hasData
-                                      ? null
-                                      : DecorationImage(
-                                          fit: BoxFit.cover,
-                                          image: NetworkImage(snapshot.data!.pfpUrl),
-                                        ),
-                                ),
-                              ),
-                              const Padding(padding: EdgeInsets.only(right: 10)),
-                              Expanded(
-                                  child: LinearPercentIndicator(
-                                percent: payFractionUser2,
-                                lineHeight: 40,
-                                barRadius: const Radius.circular(50),
-                                animation: true,
-                                center: Text('${(payFractionUser2 * 100).floor()}%', style: const TextStyle(fontSize: 18)),
-                                backgroundColor: Colors.grey[800],
-                                progressColor: Colors.grey[600],
-                              )),
-                              SizedBox(
-                                width: 120,
-                                child: Column(
-                                  children: [
-                                    FittedBox(child: Text('$totalLentUser2 kr', style: const TextStyle(fontSize: 24))),
-                                    FittedBox(child: Text('($totalSumUser2 kr)', style: TextStyle(fontSize: 16, color: Colors.grey[400]))),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const Spacer(),
-                          Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Visibility(
-                                visible: adjustmentPayingUser != -1,
-                                maintainSize: true,
-                                maintainAnimation: true,
-                                maintainState: true,
-                                child: Row(
-                                  children: [
-                                    const Spacer(),
-                                    Text('${adjustmentPayingUser == 1 ? user.name : (snapshot.data != null ? snapshot.data!.name : '')},',
-                                        style: const TextStyle(fontSize: 20)),
-                                    const Padding(padding: EdgeInsets.only(right: 5)),
-                                    Text('$requiredAdjustment kr', style: const TextStyle(fontSize: 20)),
-                                    const Padding(padding: EdgeInsets.only(right: 10)),
-                                    const Icon(FontAwesomeIcons.arrowRightLong),
-                                    const Padding(padding: EdgeInsets.only(right: 10)),
-                                    Text(adjustmentPayingUser == 2 ? user.name : (snapshot.data != null ? snapshot.data!.name : ''),
-                                        style: const TextStyle(fontSize: 20)),
-                                    const Spacer(),
-                                    Button(
-                                      text: 'pay',
-                                      disabled: adjustmentPayingUser != 1,
+                          SizedBox(
+                            height: 1.0 * screenHeight / 10,
+                            child: Column(children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  IconButton(
                                       onPressed: () {
-                                        showAdjustmentDialog(context, requiredAdjustment, analyticsState, expenseState);
+                                        subtractMonth(analyticsState);
+                                        analyticsState.hasModifiedDate = true;
                                       },
-                                      paddingVertical: 12,
-                                      paddingHorizontal: 12,
-                                    ),
-                                    const Spacer(),
-                                  ],
+                                      icon: const Icon(FontAwesomeIcons.angleLeft, size: 20)),
+                                  Text('${monthNames[analyticsState.selectedDate.month]} ${analyticsState.selectedDate.year}',
+                                      style: const TextStyle(fontSize: 24)),
+                                  IconButton(
+                                      onPressed: !DateTime.now().isLaterMonth(analyticsState.selectedDate)
+                                          ? null
+                                          : () {
+                                              addMonth(analyticsState);
+                                              analyticsState.hasModifiedDate = true;
+                                            },
+                                      icon: const Icon(FontAwesomeIcons.angleRight, size: 20)),
+                                ],
+                              ),
+                            ]),
+                          ),
+                          SizedBox(
+                            height: 1.0 * screenHeight / 10,
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: widget.iconSize,
+                                  height: widget.iconSize,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[800],
+                                    shape: BoxShape.circle,
+                                    image: user.pfpUrl.isEmpty
+                                        ? null
+                                        : DecorationImage(
+                                            fit: BoxFit.cover,
+                                            image: NetworkImage(user.pfpUrl),
+                                          ),
+                                  ),
                                 ),
-                              ),
-                              Visibility(
-                                visible: adjustmentPayingUser == -1,
-                                maintainSize: true,
-                                maintainAnimation: true,
-                                maintainState: true,
-                                child: const Text('No adjustment needed :)', style: TextStyle(fontSize: 20)),
-                              ),
-                            ],
+                                const Padding(padding: EdgeInsets.only(right: 15)),
+                                Expanded(
+                                    child: LinearPercentIndicator(
+                                  percent: payFractionUser1,
+                                  lineHeight: 40,
+                                  barRadius: const Radius.circular(50),
+                                  animation: true,
+                                  center: Text('${(payFractionUser1 * 100).ceil()}%', style: const TextStyle(fontSize: 18)),
+                                  backgroundColor: Colors.grey[800],
+                                  progressColor: Colors.grey[600],
+                                )),
+                                SizedBox(
+                                  width: 120,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      FittedBox(child: Text('$totalLentUser1 kr', style: const TextStyle(fontSize: 24))),
+                                      FittedBox(child: Text('($totalSumUser1 kr)', style: TextStyle(fontSize: 16, color: Colors.grey[400]))),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          const Spacer(),
-                          StackedCategoryBars(
-                            categoryExpensesUser1: categoryExpensesUser1,
-                            categoryExpensesUser2: categoryExpensesUser2,
-                            totalSumUser1: totalSumUser1,
-                            totalSumUser2: totalSumUser2,
+                          SizedBox(
+                            height: 1.0 * screenHeight / 10,
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: widget.iconSize,
+                                  height: widget.iconSize,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[800],
+                                    shape: BoxShape.circle,
+                                    image: !snapshot.hasData
+                                        ? null
+                                        : DecorationImage(
+                                            fit: BoxFit.cover,
+                                            image: NetworkImage(snapshot.data!.pfpUrl),
+                                          ),
+                                  ),
+                                ),
+                                const Padding(padding: EdgeInsets.only(right: 10)),
+                                Expanded(
+                                    child: LinearPercentIndicator(
+                                  percent: payFractionUser2,
+                                  lineHeight: 40,
+                                  barRadius: const Radius.circular(50),
+                                  animation: true,
+                                  center: Text('${(payFractionUser2 * 100).floor()}%', style: const TextStyle(fontSize: 18)),
+                                  backgroundColor: Colors.grey[800],
+                                  progressColor: Colors.grey[600],
+                                )),
+                                SizedBox(
+                                  width: 120,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      FittedBox(child: Text('$totalLentUser2 kr', style: const TextStyle(fontSize: 24))),
+                                      FittedBox(child: Text('($totalSumUser2 kr)', style: TextStyle(fontSize: 16, color: Colors.grey[400]))),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          const Spacer(flex: 3),
+                          const Padding(padding: EdgeInsets.only(bottom: 15)),
+                          SizedBox(
+                            height: 1.0 * screenHeight / 10,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Visibility(
+                                  visible: adjustmentPayingUser != -1,
+                                  maintainSize: true,
+                                  maintainAnimation: true,
+                                  maintainState: true,
+                                  child: Row(
+                                    children: [
+                                      const Spacer(),
+                                      Text('${adjustmentPayingUser == 1 ? user.name : (snapshot.data != null ? snapshot.data!.name : '')},',
+                                          style: const TextStyle(fontSize: 20)),
+                                      const Padding(padding: EdgeInsets.only(right: 5)),
+                                      Text('$requiredAdjustment kr', style: const TextStyle(fontSize: 20)),
+                                      const Padding(padding: EdgeInsets.only(right: 10)),
+                                      const Icon(FontAwesomeIcons.arrowRightLong),
+                                      const Padding(padding: EdgeInsets.only(right: 10)),
+                                      Text(adjustmentPayingUser == 2 ? user.name : (snapshot.data != null ? snapshot.data!.name : ''),
+                                          style: const TextStyle(fontSize: 20)),
+                                      const Spacer(),
+                                      Button(
+                                        text: 'pay',
+                                        disabled: adjustmentPayingUser != 1,
+                                        onPressed: () {
+                                          showAdjustmentDialog(context, requiredAdjustment, analyticsState, expenseState);
+                                        },
+                                        paddingVertical: 12,
+                                        paddingHorizontal: 12,
+                                      ),
+                                      const Spacer(),
+                                    ],
+                                  ),
+                                ),
+                                Visibility(
+                                  visible: adjustmentPayingUser == -1,
+                                  maintainSize: true,
+                                  maintainAnimation: true,
+                                  maintainState: true,
+                                  child: const Text('No adjustment needed :)', style: TextStyle(fontSize: 20)),
+                                ),
+                                const Padding(padding: EdgeInsets.only(bottom: 10)),
+                              ],
+                            ),
+                          ),
+                          const Padding(padding: EdgeInsets.only(bottom: 15)),
+                          SizedBox(
+                            height: 5 * screenHeight / 10,
+                            child: StackedCategoryBars(
+                              categoryExpensesUser1: categoryExpensesUser1,
+                              categoryExpensesUser2: categoryExpensesUser2,
+                              totalSumUser1: totalSumUser1,
+                              totalSumUser2: totalSumUser2,
+                              maxHeight: 3 * screenHeight / 10,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -372,13 +399,15 @@ class StackedCategoryBars extends StatelessWidget {
   final List<double> categoryExpensesUser2;
   final int totalSumUser1;
   final int totalSumUser2;
+  final double maxHeight;
 
   const StackedCategoryBars(
       {super.key,
       required this.categoryExpensesUser1,
       required this.categoryExpensesUser2,
       required this.totalSumUser1,
-      required this.totalSumUser2});
+      required this.totalSumUser2,
+      required this.maxHeight});
 
   @override
   Widget build(BuildContext context) {
@@ -398,6 +427,7 @@ class StackedCategoryBars extends StatelessWidget {
                 expenseFractionUser2: totalSumUser2 == 0 ? 0 : categoryExpensesUser2[index] / max,
                 index: index,
                 categorySum: (categoryExpensesUser1[index] + categoryExpensesUser2[index]).toInt(),
+                maxHeight: maxHeight,
               )),
     );
   }
@@ -408,11 +438,15 @@ class CategoryBar extends StatelessWidget {
   final double expenseFractionUser2;
   final int index;
   final int categorySum;
-
-  final double maxHeight = 200;
+  final double maxHeight;
 
   const CategoryBar(
-      {super.key, required this.expenseFractionUser1, required this.expenseFractionUser2, required this.index, required this.categorySum});
+      {super.key,
+      required this.expenseFractionUser1,
+      required this.expenseFractionUser2,
+      required this.index,
+      required this.categorySum,
+      required this.maxHeight});
 
   @override
   Widget build(BuildContext context) {

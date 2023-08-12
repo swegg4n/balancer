@@ -70,14 +70,31 @@ class _HistoryScreenState extends State<HistoryScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: Wrap(
-                    spacing: 10,
-                    children: List.generate(
-                        7,
-                        (index) =>
-                            ChipButton(category: categories[chipSortOrder[index]], historyState: historyState, scrollController: scrollController)),
-                  ),
+                  child: Column(children: [
+                    FittedBox(
+                      child: Row(
+                          children: List.generate(
+                              3,
+                              (index) => ChipButton(
+                                  category: categories[chipSortOrder[index]], historyState: historyState, scrollController: scrollController))),
+                    ),
+                    FittedBox(
+                      child: Row(
+                          children: List.generate(
+                              2,
+                              (index) => ChipButton(
+                                  category: categories[chipSortOrder[index + 3]], historyState: historyState, scrollController: scrollController))),
+                    ),
+                    FittedBox(
+                      child: Row(
+                          children: List.generate(
+                              2,
+                              (index) => ChipButton(
+                                  category: categories[chipSortOrder[index + 5]], historyState: historyState, scrollController: scrollController))),
+                    ),
+                  ]),
                 ),
+                const Padding(padding: EdgeInsets.only(right: 15)),
                 Column(
                   children: [
                     SizedBox(
@@ -216,32 +233,35 @@ class ChipButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ButtonStyle(
-        backgroundColor: MaterialStatePropertyAll(historyState.selectedCategories[category.index] ? category.color : Colors.grey[850]),
-        side: MaterialStateProperty.all(
-          BorderSide(style: BorderStyle.solid, width: 1.0, color: category.color),
+    return Padding(
+      padding: const EdgeInsets.only(right: 7),
+      child: ElevatedButton(
+        style: ButtonStyle(
+          backgroundColor: MaterialStatePropertyAll(historyState.selectedCategories[category.index] ? category.color : Colors.grey[850]),
+          side: MaterialStateProperty.all(
+            BorderSide(style: BorderStyle.solid, width: 1.0, color: category.color),
+          ),
+          shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(50))),
         ),
-        shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(50))),
-      ),
-      onPressed: () {
-        historyState.toggleSelectedCategory(category.index);
-        scrollController.jumpTo(scrollController.position.minScrollExtent);
-      },
-      onLongPress: () {
-        if (historyState.selectedCategories.where((x) => x == true).length > 1 || historyState.selectedCategories[category.index] == false) {
-          List<bool> newSelection = [false, false, false, false, false, false, false];
-          newSelection[category.index] = true;
-          historyState.selectedCategories = newSelection;
-        } else {
-          List<bool> newSelection = [true, true, true, true, true, true, true];
-          historyState.selectedCategories = newSelection;
-        }
-        scrollController.jumpTo(scrollController.position.minScrollExtent);
-      },
-      child: Text(
-        category.name,
-        style: TextStyle(color: historyState.selectedCategories[category.index] ? Colors.grey[850] : category.color),
+        onPressed: () {
+          historyState.toggleSelectedCategory(category.index);
+          scrollController.jumpTo(scrollController.position.minScrollExtent);
+        },
+        onLongPress: () {
+          if (historyState.selectedCategories.where((x) => x == true).length > 1 || historyState.selectedCategories[category.index] == false) {
+            List<bool> newSelection = [false, false, false, false, false, false, false];
+            newSelection[category.index] = true;
+            historyState.selectedCategories = newSelection;
+          } else {
+            List<bool> newSelection = [true, true, true, true, true, true, true];
+            historyState.selectedCategories = newSelection;
+          }
+          scrollController.jumpTo(scrollController.position.minScrollExtent);
+        },
+        child: Text(
+          category.name,
+          style: TextStyle(color: historyState.selectedCategories[category.index] ? Colors.grey[850] : category.color),
+        ),
       ),
     );
   }

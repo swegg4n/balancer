@@ -142,23 +142,6 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                TextFieldPrimary(
-                  label: editExpense ? '' : 'Enter a description',
-                  fontSize: 20,
-                  icon: null,
-                  outline: false,
-                  controller: descriptionController,
-                  inputType: TextInputType.text,
-                  textCapitalization: TextCapitalization.sentences,
-                  textInputAction: TextInputAction.next,
-                  autofocus: false,
-                  onChanged: () {
-                    setState(() {
-                      allInfoProvided = amountController.text.isNotEmpty;
-                    });
-                  },
-                ),
-                const Spacer(),
                 Row(
                   children: [
                     Expanded(
@@ -190,6 +173,23 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
                     )
                   ],
                 ),
+                const Spacer(),
+                TextFieldPrimary(
+                  label: editExpense ? '' : '(description)',
+                  fontSize: 20,
+                  icon: null,
+                  outline: false,
+                  controller: descriptionController,
+                  inputType: TextInputType.text,
+                  textCapitalization: TextCapitalization.sentences,
+                  textInputAction: TextInputAction.next,
+                  autofocus: false,
+                  onChanged: () {
+                    setState(() {
+                      allInfoProvided = amountController.text.isNotEmpty;
+                    });
+                  },
+                ),
                 const Spacer(flex: 2),
                 Stack(
                   alignment: Alignment.center,
@@ -216,12 +216,12 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '0% my\nexpense',
+                      '0%\nfor me',
                       style: TextStyle(fontSize: 15, color: Color(0xffcccccc)),
                       textAlign: TextAlign.center,
                     ),
                     Text(
-                      '100% my\nexpense',
+                      '100%\nfor me',
                       style: TextStyle(fontSize: 15, color: Color(0xffcccccc)),
                       textAlign: TextAlign.center,
                     ),
