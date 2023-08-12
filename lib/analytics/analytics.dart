@@ -233,7 +233,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                                           ),
                                   ),
                                 ),
-                                const Padding(padding: EdgeInsets.only(right: 15)),
+                                const Padding(padding: EdgeInsets.only(right: 10)),
                                 Expanded(
                                     child: LinearPercentIndicator(
                                   percent: payFractionUser1,
