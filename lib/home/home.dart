@@ -10,9 +10,7 @@ import 'package:Balancer/profile/profile.dart';
 import 'package:Balancer/services/auth.dart';
 import 'package:Balancer/shared/error.dart';
 import 'package:provider/provider.dart';
-
-import '../analytics/analytics_state.dart';
-import '../login/register.dart';
+import 'package:Balancer/login/register.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
