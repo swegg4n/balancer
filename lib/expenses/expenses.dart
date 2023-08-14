@@ -403,20 +403,25 @@ class CategoriesPicker extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: categories
                     .map(
-                      (c) => ButtonIconL(
-                        text: c.name,
-                        subtext: c.description,
-                        icon: c.icon,
-                        iconSize: 28,
-                        fontSize: 20,
-                        textColor: c.color,
-                        iconColor: c.color,
-                        color: Colors.grey[850],
-                        onPressed: () {
-                          expensesState.selectedCategory = categories[c.index];
-                          if (c.index != 6) AppPreferences.setLastCategoryIndex(c.index);
-                          Navigator.pop(context);
-                        },
+                      (c) => SizedBox(
+                        height: (8 / 12 * MediaQuery.of(context).size.height) / 8 - 7,
+                        child: ButtonIconL(
+                          text: c.name,
+                          subtext: c.description,
+                          icon: c.icon,
+                          iconSize: 28,
+                          fontSize: 20,
+                          textColor: c.color,
+                          iconColor: c.color,
+                          paddingVertical: 5,
+                          color: Colors.grey[850],
+                          fit: true,
+                          onPressed: () {
+                            expensesState.selectedCategory = categories[c.index];
+                            if (c.index != 6) AppPreferences.setLastCategoryIndex(c.index);
+                            Navigator.pop(context);
+                          },
+                        ),
                       ),
                     )
                     .toList(),

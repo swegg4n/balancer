@@ -156,6 +156,7 @@ class ButtonIconL extends StatelessWidget {
   final IconData? icon;
   final double? iconSize;
   final Color? iconColor;
+  final bool fit;
 
   const ButtonIconL(
       {Key? key,
@@ -172,7 +173,8 @@ class ButtonIconL extends StatelessWidget {
       this.disabled = false,
       required this.icon,
       this.iconSize = 20,
-      this.iconColor = Colors.white})
+      this.iconColor = Colors.white,
+      this.fit = false})
       : super(key: key);
 
   @override
@@ -197,27 +199,30 @@ class ButtonIconL extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: paddingVertical, horizontal: paddingHorizontal),
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Icon(icon, size: iconSize, color: iconColor),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Visibility(
-                visible: text != '',
-                child: Text(
-                  text,
-                  style: TextStyle(fontSize: fontSize, color: disabled ? const Color(0xffcccccc) : textColor ?? Colors.white),
-                  textAlign: TextAlign.right,
+          FittedBox(fit: fit ? BoxFit.fitHeight : BoxFit.none, child: Icon(icon, size: iconSize, color: iconColor)),
+          FittedBox(
+            fit: fit ? BoxFit.fitHeight : BoxFit.none,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Visibility(
+                  visible: text != '',
+                  child: Text(
+                    text,
+                    style: TextStyle(fontSize: fontSize, color: disabled ? const Color(0xffcccccc) : textColor ?? Colors.white),
+                    textAlign: TextAlign.right,
+                  ),
                 ),
-              ),
-              Visibility(
-                visible: subtext != '',
-                child: Text(
-                  subtext,
-                  style: TextStyle(fontSize: fontSize - 5, color: const Color(0xffcccccc)),
-                  textAlign: TextAlign.center,
+                Visibility(
+                  visible: subtext != '',
+                  child: Text(
+                    subtext,
+                    style: TextStyle(fontSize: fontSize - 5, color: const Color(0xffcccccc)),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ]),
       ),
