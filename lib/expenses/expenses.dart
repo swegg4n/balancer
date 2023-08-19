@@ -153,7 +153,7 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
                         controller: amountController,
                         inputType: TextInputType.number,
                         textInputAction: TextInputAction.next,
-                        autofocus: false,
+                        autofocus: true,
                         onChanged: () {
                           setState(() {
                             allInfoProvided = amountController.text.isNotEmpty;
