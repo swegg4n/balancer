@@ -135,7 +135,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       categoryExpensesUser1 = categorySumsUser1;
       categoryExpensesUser2 = categorySumsUser2;
 
-      requiredAdjustment = ((totalLentUser1 - totalLentUser2).abs() / 2).ceil();
+      requiredAdjustment = (totalLentUser1 - totalLentUser2).abs();
       if (requiredAdjustment <= 1) {
         requiredAdjustment = 0;
         adjustmentPayingUser = -1;

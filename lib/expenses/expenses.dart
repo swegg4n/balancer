@@ -269,7 +269,7 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
                         bool success = false;
                         Expense newExpense = Expense(
                           description: descriptionController.text,
-                          amount: double.parse(amountController.text),
+                          amount: double.parse(amountController.text).abs(),
                           categoryIndex: expensesState.selectedCategory.index,
                           epoch: expensesState.selectedDate.millisecondsSinceEpoch,
                           split: splitPct / 100,
@@ -288,8 +288,7 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
 
                           if (editExpense) {
                             await Future.delayed(Duration(seconds: 2));
-                            Navigator.pop(context);
-                            Navigator.pop(context);
+                            Navigator.of(context).popUntil((route) => route.isFirst);
                           }
 
                           expensesState.reset();
@@ -346,8 +345,8 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
 
                               if (editExpense) {
                                 await Future.delayed(Duration(seconds: 2));
-                                Navigator.pop(context);
-                                Navigator.pop(context);
+                                FocusManager.instance.primaryFocus?.unfocus();
+                                Navigator.of(context).popUntil((route) => route.isFirst);
                               }
 
                               expensesState.reset();
