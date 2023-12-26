@@ -191,41 +191,54 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
                   },
                 ),
                 const Spacer(flex: 2),
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    SizedBox(
-                      height: 18,
-                      width: 2,
-                      child: Container(color: Theme.of(context).primaryColor),
-                    ),
-                    Slider(
-                        value: splitPct,
-                        min: 0.0,
-                        max: 100.0,
-                        divisions: 20,
-                        label: '${splitPct.round()}%',
-                        onChanged: (value) {
-                          setState(() {
-                            splitPct = value;
-                          });
-                        }),
-                  ],
-                ),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '0%\nfor me',
-                      style: TextStyle(fontSize: 15, color: Color(0xffcccccc)),
-                      textAlign: TextAlign.center,
-                    ),
-                    Text(
-                      '100%\nfor me',
-                      style: TextStyle(fontSize: 15, color: Color(0xffcccccc)),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+                Visibility(
+                  visible: expensesState.selectedCategory.index != 6,
+                  maintainSize: true,
+                  maintainState: true,
+                  maintainAnimation: true,
+                  child: Column(
+                    children: [
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          SizedBox(
+                            height: 18,
+                            width: 2,
+                            child: Container(
+                                color: Theme.of(context).primaryColor),
+                          ),
+                          Slider(
+                              value: splitPct,
+                              min: 0.0,
+                              max: 100.0,
+                              divisions: 20,
+                              label: '${splitPct.round()}%',
+                              onChanged: (value) {
+                                setState(() {
+                                  splitPct = value;
+                                });
+                              }),
+                        ],
+                      ),
+                      const Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '0%\nfor me',
+                            style: TextStyle(
+                                fontSize: 15, color: Color(0xffcccccc)),
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            '100%\nfor me',
+                            style: TextStyle(
+                                fontSize: 15, color: Color(0xffcccccc)),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
                 const Spacer(),
                 ButtonIconR(
@@ -286,10 +299,8 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
                           expensesState.hasModifiedExpense = true;
                           analyticsState.hasModifiedDate = true;
 
-                          if (editExpense) {
-                            await Future.delayed(Duration(seconds: 2));
-                            Navigator.of(context).popUntil((route) => route.isFirst);
-                          }
+                          await Future.delayed(Duration(milliseconds: 1500));
+                          Navigator.of(context).popUntil((route) => route.isFirst);
 
                           expensesState.reset();
                           descriptionController.text = '';
