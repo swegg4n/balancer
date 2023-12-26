@@ -30,6 +30,8 @@ class AnalyticsScreen extends StatefulWidget {
 
 class _AnalyticsScreenState extends State<AnalyticsScreen> {
   late Future<List<Expense>> _monthlyExpensesFuture;
+  int totalSumWithoutAdjustmentUser1 = 0;
+  int totalSumWithoutAdjustmentUser2 = 0;
   int totalSumUser1 = 0;
   int totalLentUser1 = 0;
   int totalSumUser2 = 0;
@@ -72,6 +74,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     List<Expense> monthlyExpenses = await _monthlyExpensesFuture;
     User user = AuthService().user!;
 
+    double sumWithoutAdjustmentUser1 = 0;
+    double sumWithoutAdjustmentUser2 = 0;
     double sumUser1 = 0;
     double lentUser1 = 0;
     double sumUser2 = 0;
@@ -107,12 +111,19 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       }
     }
 
-    lentUser1 += adjustmentUser1;
+    sumWithoutAdjustmentUser1 = sumUser1;
+    sumUser1 += adjustmentUser1;
+    sumUser1 -= adjustmentUser2;
     lentUser1 -= adjustmentUser2;
-    lentUser2 += adjustmentUser2;
+
+    sumWithoutAdjustmentUser2 = sumUser2;
+    sumUser2 += adjustmentUser2;
+    sumUser2 -= adjustmentUser1;
     lentUser2 -= adjustmentUser1;
 
     setState(() {
+      totalSumWithoutAdjustmentUser1 = sumWithoutAdjustmentUser1.toInt();
+      totalSumWithoutAdjustmentUser2 = sumWithoutAdjustmentUser2.toInt();
       totalSumUser1 = sumUser1.toInt();
       totalLentUser1 = lentUser1.toInt();
       totalSumUser2 = sumUser2.toInt();
@@ -353,8 +364,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                             child: StackedCategoryBars(
                               categoryExpensesUser1: categoryExpensesUser1,
                               categoryExpensesUser2: categoryExpensesUser2,
-                              totalSumUser1: totalSumUser1,
-                              totalSumUser2: totalSumUser2,
+                              totalSumUser1: totalSumWithoutAdjustmentUser1,
+                              totalSumUser2: totalSumWithoutAdjustmentUser2,
                               maxHeight: 3 * screenHeight / 10,
                             ),
                           ),
@@ -374,6 +385,20 @@ void showAdjustmentDialog(dynamic context, int requiredAdjustment, AnalyticsStat
   showDialog(
       context: context,
       builder: (context) {
+
+        DateTime payDate;
+
+        int year = analyticsState.selectedDate.year;
+        int month = analyticsState.selectedDate.month;
+        int day = analyticsState.selectedDate.day;
+
+        DateTime now = DateTime.now();
+        if (year == now.year && month == now.month) {
+          payDate = now;
+        } else {
+          payDate = DateTime(year, month+1, day-1);
+        }
+
         return AlertDialog(
           title: const Text('Adjustment'),
           content: Text('Are you sure you want to log an adjustment of $requiredAdjustment kr?'),
@@ -384,7 +409,7 @@ void showAdjustmentDialog(dynamic context, int requiredAdjustment, AnalyticsStat
               onPressed: () async {
                 analyticsState.hasModifiedDate = true;
                 expenseState.hasModifiedExpense = true;
-                Expense expense = Expense(amount: requiredAdjustment.toDouble(), categoryIndex: 6, epoch: DateTime.now().millisecondsSinceEpoch);
+                Expense expense = Expense(amount: requiredAdjustment.toDouble(), categoryIndex: 6, epoch: payDate.millisecondsSinceEpoch);
                 await FirestoreService().createExpense(expense, false);
                 Navigator.pop(context);
               },
